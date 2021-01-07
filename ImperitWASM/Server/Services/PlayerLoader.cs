@@ -10,7 +10,7 @@ namespace ImperitWASM.Server.Services
 {
 	public interface IPlayers
 	{
-		ImmutableArray<Player> this[long gameId] { get; }
+		ImmutableArray<Player> this[int gameId] { get; }
 		Player? this[string? name] { get; }
 		void Add(Player player);
 		Task UpdateAsync(IEnumerable<Player> players);
@@ -22,7 +22,7 @@ namespace ImperitWASM.Server.Services
 		readonly ImperitContext ctx;
 		public PlayerLoader(ImperitContext ctx) => this.ctx = ctx;
 
-		public ImmutableArray<Player> this[long gameId] => ctx.Players!.AsNoTracking().Where(player => player.GameId == gameId).OrderBy(player => player.Order).AsEnumerable().ToImmutableArray();
+		public ImmutableArray<Player> this[int gameId] => ctx.Players!.AsNoTracking().Where(player => player.GameId == gameId).OrderBy(player => player.Order).AsEnumerable().ToImmutableArray();
 		public Player? this[string? name] => ctx.Players!.AsNoTracking().SingleOrDefault(player => player.Name == name);
 		public void Add(Player player) => ctx.Players!.Add(player);
 		public Task UpdateAsync(IEnumerable<Player> players)

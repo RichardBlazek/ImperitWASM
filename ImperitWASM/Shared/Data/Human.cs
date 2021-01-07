@@ -6,12 +6,14 @@ namespace ImperitWASM.Shared.Data
 	{
 		public string StringPassword { get; private set; }
 		public Password Password => new Password(StringPassword);
-		protected Human(string name, long gameId, int order, Color color, int money, bool alive, Settings settings, bool isActive)
-			: base(name, gameId, order, color, money, alive, settings, isActive) => StringPassword = "";
-		public Human(string name, long gameId, int order, Color color, int money, bool alive, Settings settings, bool isActive, Password password)
+		public Human(string name, int gameId, int order, Color color, int money, bool alive, Settings settings, bool isActive, Password password)
 			: base(name, gameId, order, color, money, alive, settings, isActive) => StringPassword = password.ToString();
 
 		public virtual bool Equals(Human? obj) => obj is not null && Name == obj.Name;
 		public override int GetHashCode() => Name.GetHashCode();
+
+#pragma warning disable CS8618
+		private Human() { }
+#pragma warning restore CS8618
 	}
 }

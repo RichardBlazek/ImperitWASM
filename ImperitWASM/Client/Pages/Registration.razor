@@ -10,7 +10,7 @@
 	string Username { get; set; } = "";
 	string Password { get; set; } = "";
 	int? Selected = null;
-	long GameId;
+	int GameId;
 	Color NextColor = new Color();
 	Data.RegistrationErrors Error = Data.RegistrationErrors.Ok;
 	Map? map;
@@ -25,10 +25,10 @@
 	}
 	protected override async Task OnInitializedAsync()
 	{
-		GameId = await http.GetAsync<long>("api/Game/RegistrableGame");
+		GameId = await http.GetAsync<int>("api/Game/RegistrableGame");
 		await provinces.Update("api/Provinces/Current", GameId);
-		Inhabitable = await http.PostAsync<long, ImmutableArray<bool>>("api/Provinces/Free", GameId);
-		NextColor = await http.PostAsync<long, Color>("api/Game/NextColor", GameId);
+		Inhabitable = await http.PostAsync<int, ImmutableArray<bool>>("api/Provinces/Free", GameId);
+		NextColor = await http.PostAsync<int, Color>("api/Game/NextColor", GameId);
 	}
 #pragma warning disable 1998
 	async Task OnClickAsync(int i)

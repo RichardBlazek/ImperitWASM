@@ -22,10 +22,10 @@
 	}
 	protected override async Task OnInitializedAsync()
 	{
-		Active = await http.PostAsync<long, int>("api/Player/Active", storage.GameId!.Value);
-		Players = await http.PostAsync<long, ImmutableArray<PlayerInfo>>("api/Player/Infos", storage.GameId!.Value);
+		Active = await http.PostAsync<int, int>("api/Player/Active", storage.GameId!.Value);
+		Players = await http.PostAsync<int, ImmutableArray<PlayerInfo>>("api/Player/Infos", storage.GameId!.Value);
 		StateHasChanged();
-		Powers = await http.PostAsync<long, ImmutableArray<ImmutableArray<Power>>>("api/Powers/List", storage.GameId!.Value);
+		Powers = await http.PostAsync<int, ImmutableArray<ImmutableArray<Power>>>("api/Powers/List", storage.GameId!.Value);
 	}
 }
 <nav>

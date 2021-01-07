@@ -6,13 +6,14 @@ namespace ImperitWASM.Shared.Data
 {
 	public record Province
 	{
-		public long GameId { get; private set; }
+		public int Id { get; private set; }
+		public int GameId { get; private set; }
 		public int RegionId { get; private set; }
 		public virtual Region Region { get; private set; }
 		public virtual Player? Player { get; private set; }
 		public virtual Soldiers Soldiers { get; private set; }
 		public virtual Settings Settings { get; private set; }
-		public Province(long gameId, Region region, Soldiers soldiers, Settings settings)
+		public Province(int gameId, Region region, Soldiers soldiers, Settings settings)
 		{
 			GameId = gameId;
 			(Region, RegionId) = (region, region.Id);
@@ -72,5 +73,9 @@ namespace ImperitWASM.Shared.Data
 
 		public virtual bool Equals(Province? other) => other is not null && other.RegionId == RegionId;
 		public override int GetHashCode() => Region.GetHashCode();
+
+#pragma warning disable CS8618
+		private Province() { }
+#pragma warning restore CS8618
 	}
 }

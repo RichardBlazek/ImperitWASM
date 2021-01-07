@@ -44,7 +44,7 @@ namespace ImperitWASM.Server.Controllers
 		[HttpPost("Move")]
 		public async Task<MoveErrors> Move([FromBody] MoveCmd m)
 		{
-			var move = new Move(provinces[m.Game, m.From], provinces[m.Game, m.To], new Soldiers(m.Counts.Select((count, i) => new Regiment(sl.Settings.SoldierTypes[i], count))));
+			var move = new Move(provinces[m.G, m.From], provinces[m.G, m.To], new Soldiers(m.Counts.Select((count, i) => new Regiment(sl.Settings.SoldierTypes[i], count))));
 			return (await cmd.PerformAsync(m.P, move)) switch
 			{
 				(true, _, _) => MoveErrors.Ok,

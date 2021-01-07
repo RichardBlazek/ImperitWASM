@@ -50,16 +50,20 @@ namespace ImperitWASM.Shared.Data
 		static string GetName(int i, Func<string, int, string> obf) => obf(GenerateName(i), i / 6);
 
 		public static Color ColorOf(int i) => Color.Generate(i, 120.0, 1.0, 1.0);
-		public Human CreateHuman(string name, long gameId, int i, int land, Password password) => new Human(name, gameId, i, ColorOf(i), StartMoney(land), true, this, i == 0, password);
-		Robot CreateRobot(string name, long gameId, int i, int land) => new Robot(name, gameId, i, ColorOf(i), StartMoney(land), true, this, false);
+		public Human CreateHuman(string name, int gameId, int i, int land, Password password) => new Human(name, gameId, i, ColorOf(i), StartMoney(land), true, this, i == 0, password);
+		Robot CreateRobot(string name, int gameId, int i, int land) => new Robot(name, gameId, i, ColorOf(i), StartMoney(land), true, this, false);
 
-		public IEnumerable<Province> Provinces(long gameId) => RegionCollection!.Select(reg => new Province(gameId, reg, reg.Soldiers, this));
+		public IEnumerable<Province> Provinces(int gameId) => RegionCollection!.Select(reg => new Province(gameId, reg, reg.Soldiers, this));
 
 		int StartMoney(int province) => DefaultMoney - (RegionCollection!.Single(r => r.Id == province).Income * 4);
-		public IEnumerable<(int, Robot)> GetRobots(long gameId, int previous_count, IEnumerable<int> lands, Func<string, int, string> obf) => lands.Select((land, i) => (land, CreateRobot(GetName(previous_count + i, obf), gameId, previous_count + i, land)));
+		public IEnumerable<(int, Robot)> GetRobots(int gameId, int previous_count, IEnumerable<int> lands, Func<string, int, string> obf) => lands.Select((land, i) => (land, CreateRobot(GetName(previous_count + i, obf), gameId, previous_count + i, land)));
 
 		public virtual bool Equals(Settings? other) => true;
 		public override int GetHashCode() => -1;
 		public override string ToString() => string.Empty;
+
+#pragma warning disable CS8618
+		private Settings() { }
+#pragma warning restore CS8618
 	}
 }

@@ -38,9 +38,9 @@ namespace ImperitWASM.Server.Controllers
 			return new GameInfo(gs.Find(p?.GameId ?? 0)?.Current, p?.IsActive ?? false);
 		}
 		[HttpPost("StartTime")]
-		public DateTime? StartTime([FromBody] long gameId) => gs.Find(gameId)?.StartTime;
+		public DateTime? StartTime([FromBody] int gameId) => gs.Find(gameId)?.StartTime;
 		[HttpPost("Winner")]
-		public Winner? Winner([FromBody] long gameId) => provinces[gameId].Winner is (Human H, _) ? new Winner(H.Name, H.Color) : null;
+		public Winner? Winner([FromBody] int gameId) => provinces[gameId].Winner is (Human H, _) ? new Winner(H.Name, H.Color) : null;
 		async Task<RegistrationErrors> DoRegistrationAsync(RegisteredPlayer player, Game game)
 		{
 			await gameCreator.RegisterAsync(game, player.N.Trim(), Password.FromPassword(player.P.Trim()), player.S);
@@ -57,13 +57,13 @@ namespace ImperitWASM.Server.Controllers
 			_ => RegistrationErrors.BadGame
 		};
 		[HttpGet("RegistrableGame")]
-		public async Task<long> RegistrableGameAsync()
+		public async Task<int> RegistrableGameAsync()
 		{
 			await gameCreator.StartAllAsync();
 			return gs.RegistrableGame ?? await gameCreator.CreateAsync();
 		}
 		[HttpPost("NextColor")]
-		public Color NextColor([FromBody] long gameId) => gameCreator.NextColor(gameId);
+		public Color NextColor([FromBody] int gameId) => gameCreator.NextColor(gameId);
 		[HttpPost("NextTurn")]
 		public async Task<bool> NextTurnAsync([FromBody] Session ses)
 		{

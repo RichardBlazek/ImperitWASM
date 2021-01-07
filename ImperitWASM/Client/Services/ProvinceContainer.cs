@@ -25,11 +25,11 @@ namespace ImperitWASM.Client.Services
 				provinces = await http.GetAsync<List<ProvinceDisplay>>(url);
 			}
 		}
-		public async Task Update(string url, long gameId)
+		public async Task Update(string url, int gameId)
 		{
 			if (provinces is not null)
 			{
-				var values = await http.PostAsync<long, ImmutableArray<ProvinceUpdate>>(url, gameId);
+				var values = await http.PostAsync<int, ImmutableArray<ProvinceUpdate>>(url, gameId);
 				values.Each((value, i) => provinces[i] = provinces[i].Update(value));
 			}
 		}

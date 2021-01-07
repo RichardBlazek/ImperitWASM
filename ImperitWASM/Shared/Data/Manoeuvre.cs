@@ -16,5 +16,9 @@ namespace ImperitWASM.Shared.Data
 		{
 			return (active, provinces.With(provinces.Select(altered => altered == Province ? altered.VisitedBy(active, Soldiers) : altered)), null);
 		}
+
+#pragma warning disable CS8618
+		private Manoeuvre() { }
+#pragma warning restore CS8618
 	}
 }

@@ -18,7 +18,7 @@
 		Text = state switch
 		{
 			Game.State.Created => "Zatím jsi jediný zaregistrovaný hráč, počkej prosím na další",
-			Game.State.CountDown => "Hra začne v " + (await http.PostAsync<long, DateTime?>("api/Game/StartTime", storage.GameId!.Value))!.Value.ToString("HH:mm:ss"),
+			Game.State.CountDown => "Hra začne v " + (await http.PostAsync<int, DateTime?>("api/Game/StartTime", storage.GameId!.Value))!.Value.ToString("HH:mm:ss"),
 			Game.State.Finished => "Hra již skončila, můžeš se zaregistrovat do další",
 			_ => ""
 		};

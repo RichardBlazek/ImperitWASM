@@ -7,7 +7,7 @@ namespace ImperitWASM.Server.Services
 {
 	public interface IEndOfTurn
 	{
-		Task<bool> NextTurnAsync(long gameId, string actorName);
+		Task<bool> NextTurnAsync(int gameId, string actorName);
 	}
 	public class EndOfTurn : IEndOfTurn
 	{
@@ -22,14 +22,14 @@ namespace ImperitWASM.Server.Services
 			this.powers = powers;
 			this.commands = commands;
 		}
-		public async Task<bool> NextTurnAsync(long gameId, string actorName)
+		public async Task<bool> NextTurnAsync(int gameId, string actorName)
 		{
 			if (await commands.PerformAsync(actorName, new NextTurn()) is (true, var players, var provinces))
 			{
 				bool finish = !players.Any(player => player is Human { Alive: true }) || (provinces.Winner is (Human, int finals) && finals >= sl.Settings.FinalLandsCount);
 				int turn = powers.Count(gameId);
 				_ = gs.Update(gameId, game => finish ? game.Finish() : game);
-				await powers.AddAsync(players.Select(player => player.Power(turn, provinces.ControlledBy(player))));
+				await powers.AddAsync(players.Select((player, i) => player.Power(turn + i, provinces.ControlledBy(player))));
 				return finish;
 			}
 			return false;

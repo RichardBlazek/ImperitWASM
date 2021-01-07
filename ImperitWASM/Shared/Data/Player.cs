@@ -8,7 +8,7 @@ namespace ImperitWASM.Shared.Data
 	public abstract record Player
 	{
 		public string Name { get; private set; }
-		public long GameId { get; private set; }
+		public int GameId { get; private set; }
 		public int Order { get; private set; }
 		public Color Color { get; private set; }
 		public int Money { get; private set; }
@@ -17,7 +17,7 @@ namespace ImperitWASM.Shared.Data
 		public ImmutableArray<Action> Actions => ActionList!.ToImmutableArray();
 		public virtual Settings Settings { get; private set; }
 		public bool IsActive { get; private set; }
-		public Player(string name, long gameId, int order, Color color, int money, bool alive, Settings settings, bool isActive) => (Name, GameId, Order, Color, Money, Alive, Settings, IsActive) = (name, gameId, order, color, money, alive, settings, isActive);
+		public Player(string name, int gameId, int order, Color color, int money, bool alive, Settings settings, bool isActive) => (Name, GameId, Order, Color, Money, Alive, Settings, IsActive) = (name, gameId, order, color, money, alive, settings, isActive);
 
 		public int MaxBorrowable => Settings.Discount(Settings.DebtLimit - Debt);
 		public int MaxUsableMoney => Money + MaxBorrowable;
@@ -45,10 +45,14 @@ namespace ImperitWASM.Shared.Data
 		}
 
 		public int Debt => Actions.OfType<Loan>().Sum(a => a.Debt);
-		public Power Power(int turn, IEnumerable<Province> provinces) => new Power(Name, turn, Alive, provinces.Sum(p => p.Score), provinces.Sum(p => p.Income), Money - Debt, provinces.Sum(p => p.Power));
+		public Power Power(int turn, IEnumerable<Province> provinces) => new Power(GameId, turn, Alive, provinces.Sum(p => p.Score), provinces.Sum(p => p.Income), Money - Debt, provinces.Sum(p => p.Power));
 		public virtual bool Equals(Player? obj) => obj is not null && Name == obj.Name;
 		public override int GetHashCode() => Name.GetHashCode();
 
 		public static Color ColorOf(Player? player) => player?.Color ?? new Color();
+
+#pragma warning disable CS8618
+		protected Player() { }
+#pragma warning restore CS8618
 	}
 }

@@ -27,15 +27,15 @@ namespace ImperitWASM.Server.Controllers
 			this.gs = gs;
 		}
 		[HttpPost("Active")]
-		public int Active([FromBody] long gameId) => players[gameId].First(player => player.IsActive).Order;
+		public int Active([FromBody] int gameId) => players[gameId].First(player => player.IsActive).Order;
 		[HttpPost("Colors")]
-		public IEnumerable<Color> Colors([FromBody] long gameId) => players[gameId].Select(p => p.Color);
+		public IEnumerable<Color> Colors([FromBody] int gameId) => players[gameId].Select(p => p.Color);
 		[HttpPost("Money")]
 		public int Money([FromBody] string name) => players[name]?.Money ?? 0;
 		[HttpPost("Color")]
 		public Color ColorFn([FromBody] string name) => players[name]?.Color ?? new Color();
 		[HttpPost("Infos")]
-		public IEnumerable<PlayerInfo> Infos([FromBody] long gameId)
+		public IEnumerable<PlayerInfo> Infos([FromBody] int gameId)
 		{
 			var prov = provinces[gameId];
 			return players[gameId].Select(p => new PlayerInfo(p.Name, p.Color, p.Alive, p.Money, p.Debt, prov.IncomeOf(p)));

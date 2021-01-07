@@ -25,14 +25,14 @@ namespace ImperitWASM.Server.Controllers
 			return sl.Settings.Regions.Select(region => new ProvinceDisplay(region.Border, region.Center, region.Fill, region.Stroke, region.StrokeWidth, region.Text(region.Soldiers)));
 		}
 		[HttpPost("Free")]
-		public IEnumerable<bool> Free([FromBody] long gameId) => provinces[gameId].Select(p => p.Inhabitable);
+		public IEnumerable<bool> Free([FromBody] int gameId) => provinces[gameId].Select(p => p.Inhabitable);
 		[HttpPost("Current")]
-		public IEnumerable<ProvinceUpdate> Current([FromBody] long gameId)
+		public IEnumerable<ProvinceUpdate> Current([FromBody] int gameId)
 		{
 			return provinces[gameId].Select(p => new ProvinceUpdate(p.Text, p.Fill));
 		}
 		[HttpPost("Preview")]
-		public IEnumerable<ProvinceUpdate> Preview([FromBody] long gameId)
+		public IEnumerable<ProvinceUpdate> Preview([FromBody] int gameId)
 		{
 			return players[gameId].Single(player => player.IsActive).Act(provinces[gameId], sl.Settings).Item2.Select(p => new ProvinceUpdate(p.Text, p.Fill));
 		}

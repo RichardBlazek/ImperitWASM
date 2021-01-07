@@ -9,8 +9,8 @@ namespace ImperitWASM.Server.Services
 {
 	public interface IGameCreator
 	{
-		Color NextColor(long gameId);
-		Task<long> CreateAsync();
+		Color NextColor(int gameId);
+		Task<int> CreateAsync();
 		Task StartAllAsync();
 		Task RegisterAsync(Game game, string name, Password password, int land);
 	}
@@ -29,14 +29,14 @@ namespace ImperitWASM.Server.Services
 			this.ctx = ctx;
 			this.players = players;
 		}
-		public async Task<long> CreateAsync()
+		public async Task<int> CreateAsync()
 		{
-			long id = ctx.Games!.Add(new Game()).Entity.Id;
+			int id = ctx.Games!.Add(new Game()).Entity.Id;
 			gs.RemoveOld(DateTime.UtcNow.AddDays(-1.0));
 			await provinces.AddAsync(sl.Settings.Provinces(id));
 			return id;
 		}
-		public Color NextColor(long gameId) => Settings.ColorOf(players[gameId].Length);
+		public Color NextColor(int gameId) => Settings.ColorOf(players[gameId].Length);
 		void Start(Game g)
 		{
 			var prov = provinces[g.Id];

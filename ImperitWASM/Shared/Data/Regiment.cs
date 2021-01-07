@@ -4,6 +4,7 @@ namespace ImperitWASM.Shared.Data
 {
 	public record Regiment
 	{
+		public int Id { get; private set; }
 		public virtual SoldierType Type { get; private set; }
 		public int Count { get; private set; }
 		public Regiment(SoldierType type, int count) => (Type, Count) = (type, count);
@@ -18,5 +19,9 @@ namespace ImperitWASM.Shared.Data
 		public bool CanMoveAlone(Provinces pap, Province from, Province to) => Type.CanMoveAlone(pap, from, to);
 		public int CanSustain(Province province) => Type.CanSustain(province) * Count;
 		public override string ToString() => Count + Type.Symbol;
+
+#pragma warning disable CS8618
+		private Regiment() { }
+#pragma warning restore CS8618
 	}
 }

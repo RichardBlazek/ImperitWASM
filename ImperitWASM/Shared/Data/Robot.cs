@@ -7,7 +7,7 @@ namespace ImperitWASM.Shared.Data
 {
 	public record Robot : Player
 	{
-		public Robot(string name, long gameId, int order, Color color, int money, bool alive, Settings settings, bool isActive) : base(name, gameId, order, color, money, alive, settings, isActive) { }
+		public Robot(string name, int gameId, int order, Color color, int money, bool alive, Settings settings, bool isActive) : base(name, gameId, order, color, money, alive, settings, isActive) { }
 
 		public virtual bool Equals(Robot? obj) => obj is not null && obj.Name == Name;
 		public override int GetHashCode() => base.GetHashCode();
@@ -146,5 +146,9 @@ namespace ImperitWASM.Shared.Data
 		{
 			return Thinking(this, players, provinces, settings);
 		}
+
+#pragma warning disable CS8618
+		private Robot() { }
+#pragma warning restore CS8618
 	}
 }
