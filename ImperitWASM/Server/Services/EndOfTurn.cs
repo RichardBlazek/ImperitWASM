@@ -1,43 +1,38 @@
-﻿using System.Threading.Tasks;
-using ImperitWASM.Server.Load;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using ImperitWASM.Shared.Commands;
-using ImperitWASM.Shared.Config;
 using ImperitWASM.Shared.Data;
 
 namespace ImperitWASM.Server.Services
 {
 	public interface IEndOfTurn
 	{
-		Task<bool> NextTurnAsync(int gameId);
+		Task<bool> NextTurnAsync(long gameId, string actorName);
 	}
 	public class EndOfTurn : IEndOfTurn
 	{
-		readonly IPlayersProvinces pap;
-		readonly IContextService ctx;
-		readonly IGameService gs;
-		readonly Settings settings;
-		public EndOfTurn(IPlayersProvinces pap, Settings settings, IContextService ctx, IGameService gs)
+		readonly ISettings sl;
+		readonly IGames gs;
+		readonly IPowers powers;
+		readonly ICommands commands;
+		public EndOfTurn(ISettings sl, IGames gs, IPowers powers, ICommands commands)
 		{
-			this.pap = pap;
-			this.settings = settings;
-			this.ctx = ctx;
+			this.sl = sl;
 			this.gs = gs;
+			this.powers = powers;
+			this.commands = commands;
 		}
-		static bool FinishGame(Game g, bool finish, int active)
+		public async Task<bool> NextTurnAsync(long gameId, string actorName)
 		{
-			(finish ? g.Finish() : g).Active = active;
-			return finish;
-		}
-		public async Task<bool> NextTurnAsync(int gameId)
-		{
-			var g = gs.Find(gameId);
-			var (p_p, active) = pap[gameId].EndOfTurn(g.Active);
-			pap[gameId] = p_p;
-
-			bool finish = FinishGame(g, !p_p.AnyHuman || p_p.Winner(settings.FinalLandsCount) is Human, active);
-			ctx.Add(gameId, p_p.PlayersPower);
-			await ctx.SaveAsync();
-			return finish;
+			if (await commands.PerformAsync(actorName, new NextTurn()) is (true, var players, var provinces))
+			{
+				bool finish = !players.Any(player => player is Human { Alive: true }) || (provinces.Winner is (Human, int finals) && finals >= sl.Settings.FinalLandsCount);
+				int turn = powers.Count(gameId);
+				_ = gs.Update(gameId, game => finish ? game.Finish() : game);
+				await powers.AddAsync(players.Select(player => player.Power(turn, provinces.ControlledBy(player))));
+				return finish;
+			}
+			return false;
 		}
 	}
 }

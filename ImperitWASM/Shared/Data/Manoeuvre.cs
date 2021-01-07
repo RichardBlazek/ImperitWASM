@@ -1,10 +1,20 @@
+﻿using System.Linq;
+
 namespace ImperitWASM.Shared.Data
 {
-	public record Manoeuvre(Player Player, Soldiers Soldiers) : IProvinceAction
+	public record Manoeuvre : Action
 	{
-		public (Province, IProvinceAction?) Perform(Province province, PlayersAndProvinces pap)
+		public virtual Province Province { get; private set; }
+		public virtual Soldiers Soldiers { get; private set; }
+		public Manoeuvre(Province province, Soldiers soldiers)
 		{
-			return (province.IsAllyOf(Player) ? province.Reinforce(Soldiers) : province.AttackedBy(Player, Soldiers), null);
+			Province = province;
+			Soldiers = soldiers;
+		}
+
+		public override (Player, Provinces, Action?) Perform(Player active, Provinces provinces, Settings settings)
+		{
+			return (active, provinces.With(provinces.Select(altered => altered == Province ? altered.VisitedBy(active, Soldiers) : altered)), null);
 		}
 	}
 }

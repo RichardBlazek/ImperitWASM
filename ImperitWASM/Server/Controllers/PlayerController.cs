@@ -2,12 +2,10 @@
 using System.Linq;
 using System.Threading.Tasks;
 using ImperitWASM.Client.Data;
-using ImperitWASM.Server.Load;
 using ImperitWASM.Server.Services;
-using ImperitWASM.Shared.Config;
 using ImperitWASM.Shared.Data;
+using ImperitWASM.Shared.Value;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace ImperitWASM.Server.Controllers
 {
@@ -15,44 +13,42 @@ namespace ImperitWASM.Server.Controllers
 	[Route("api/[controller]")]
 	public class PlayerController : ControllerBase
 	{
-		readonly ISessionService session;
-		readonly IPlayersProvinces pap;
-		readonly IContextService ctx;
+		readonly ISessions session;
+		readonly IProvinces provinces;
+		readonly IPlayers players;
 		readonly IGameCreator gameCreator;
-		readonly IGameService gs;
-		public PlayerController(IPlayersProvinces pap, ISessionService session, IContextService ctx, IGameCreator gameCreator, IGameService gs)
+		readonly IGames gs;
+		public PlayerController(IProvinces provinces, ISessions session, IPlayers players, IGameCreator gameCreator, IGames gs)
 		{
-			this.pap = pap;
+			this.provinces = provinces;
 			this.session = session;
-			this.ctx = ctx;
+			this.players = players;
 			this.gameCreator = gameCreator;
 			this.gs = gs;
 		}
+		[HttpPost("Active")]
+		public int Active([FromBody] long gameId) => players[gameId].First(player => player.IsActive).Order;
 		[HttpPost("Colors")]
-		public IEnumerable<Color> Colors([FromBody] int gameId) => ctx.Players.Where(p => p.GameId == gameId).OrderBy(p => p.Index).Select(p => Color.Parse(p.Color));
+		public IEnumerable<Color> Colors([FromBody] long gameId) => players[gameId].Select(p => p.Color);
 		[HttpPost("Money")]
-		public int Money([FromBody] Session ses) => ctx.Players.SingleOrDefault(p => p.GameId == ses.G && p.Index == ses.P)?.Money ?? 0;
+		public int Money([FromBody] string name) => players[name]?.Money ?? 0;
+		[HttpPost("Color")]
+		public Color ColorFn([FromBody] string name) => players[name]?.Color ?? new Color();
 		[HttpPost("Infos")]
-		public IEnumerable<PlayerInfo> Infos([FromBody] Session ses)
+		public IEnumerable<PlayerInfo> Infos([FromBody] long gameId)
 		{
-			if (!session.IsValid(ses.P, ses.G, ses.Key))
-			{
-				return Enumerable.Empty<PlayerInfo>();
-			}
-			var p_p = pap[ses.G];
-			return p_p.Players.Select((p, i) => new PlayerInfo(i, p is not Savage, p.Name, p.Color, p.Alive, p.Money, p.Debt, p_p.IncomeOf(p)));
+			var prov = provinces[gameId];
+			return players[gameId].Select(p => new PlayerInfo(p.Name, p.Color, p.Alive, p.Money, p.Debt, prov.IncomeOf(p)));
 		}
 		[HttpPost("Correct")]
-		public GameState Correct([FromBody] Session user) => session.IsValid(user.P, user.G, user.Key) ? gs.FindNoTracking(user.G)?.GetState() ?? GameState.Invalid : GameState.Invalid;
+		public Game.State? Correct([FromBody] Session user) => session.IsValid(user) && gs.Find(players[user.P]?.GameId ?? 0) is Game g ? g.Current : null;
 		[HttpPost("Login")]
-		public async Task<Session> Login([FromBody] Login trial)
+		public async Task<LoginResult> Login([FromBody] Login trial)
 		{
 			await gameCreator.StartAllAsync();
-			return ctx.Players.SingleOrDefault(p => p.Type == EntityPlayer.Kind.Human && p.Name == trial.N) is EntityPlayer p && Password.Parse(p.Password).IsCorrect(trial.P) ? new Session(p.Index, p.GameId, await session.AddAsync(p.Index, p.GameId)) : new Session();
+			return players[trial.N] is Human h && h.Password.IsCorrect(trial.P) ? new LoginResult(new Session(trial.P, await session.AddAsync(trial.P)), h.Order, h.GameId) : new LoginResult(new Session(), -1, -1);
 		}
-		[HttpPost("Color")]
-		public Color GetColor([FromBody] PlayerId id) => Color.Parse(ctx.Players.AsNoTracking().SingleOrDefault(p => p.GameId == id.G && p.Index == id.P)?.Color ?? "#00000000");
 		[HttpPost("Logout")]
-		public Task Logout([FromBody] Session user) => session.RemoveAsync(user.P, user.G, user.Key);
+		public Task Logout([FromBody] Session user) => session.RemoveAsync(user);
 	}
 }

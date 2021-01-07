@@ -1,12 +1,12 @@
-﻿@code {
-	Description? type = null;
-	public void Open(Description new_type)
+﻿@code{
+	SoldierItem? item = null;
+	public void Open(SoldierItem @new)
 	{
-		type = new_type;
+		item = @new;
 		StateHasChanged();
 	}
 }
 
-<PopupBox Show="type is Description" OnClose="() => type = null">
-	@type?.Name (@type?.Symbol) &ndash; @(new MarkupString(string.Join("<br/>", type!.Text)))
+<PopupBox Show="item is not null" OnClose="() => item = null">
+	@item?.N (@item?.S) &ndash; @(new MarkupString(item?.T ?? ""))
 </PopupBox>

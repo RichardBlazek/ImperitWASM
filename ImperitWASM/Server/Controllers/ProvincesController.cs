@@ -2,7 +2,6 @@
 using System.Linq;
 using ImperitWASM.Client.Data;
 using ImperitWASM.Server.Services;
-using ImperitWASM.Shared.Data;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ImperitWASM.Server.Controllers
@@ -11,27 +10,31 @@ namespace ImperitWASM.Server.Controllers
 	[Route("api/[controller]")]
 	public class ProvincesController : ControllerBase
 	{
-		readonly IPlayersProvinces pap;
-		readonly IActive active;
-		public ProvincesController(IPlayersProvinces pap, IActive active)
+		readonly IProvinces provinces;
+		readonly ISettings sl;
+		readonly IPlayers players;
+		public ProvincesController(IProvinces provinces, ISettings sl, IPlayers players)
 		{
-			this.pap = pap;
-			this.active = active;
+			this.provinces = provinces;
+			this.sl = sl;
+			this.players = players;
 		}
-		[HttpPost("Shapes")]
-		public IEnumerable<ProvinceAppearance> Shapes([FromBody] int gameId)
+		[HttpGet("Default")]
+		public IEnumerable<ProvinceDisplay> Default()
 		{
-			return pap[gameId].Provinces.Select(p => new ProvinceAppearance(p.Border, p.Center, p.Fill, p.Stroke, p.StrokeWidth, p.Inhabitable, p.Text));
+			return sl.Settings.Regions.Select(region => new ProvinceDisplay(region.Border, region.Center, region.Fill, region.Stroke, region.StrokeWidth, region.Text(region.Soldiers)));
 		}
+		[HttpPost("Free")]
+		public IEnumerable<bool> Free([FromBody] long gameId) => provinces[gameId].Select(p => p.Inhabitable);
 		[HttpPost("Current")]
-		public IEnumerable<ProvinceUpdate> Current([FromBody] int gameId)
+		public IEnumerable<ProvinceUpdate> Current([FromBody] long gameId)
 		{
-			return pap[gameId].Provinces.Select(p => new ProvinceUpdate(p.Text, p.Fill));
+			return provinces[gameId].Select(p => new ProvinceUpdate(p.Text, p.Fill));
 		}
 		[HttpPost("Preview")]
-		public IEnumerable<ProvinceUpdate> Preview([FromBody] int gameId)
+		public IEnumerable<ProvinceUpdate> Preview([FromBody] long gameId)
 		{
-			return pap[gameId].Act(active[gameId], false).Provinces.Select(p => new ProvinceUpdate(p.Text, p.Fill));
+			return players[gameId].Single(player => player.IsActive).Act(provinces[gameId], sl.Settings).Item2.Select(p => new ProvinceUpdate(p.Text, p.Fill));
 		}
 	}
 }

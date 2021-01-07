@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace ImperitWASM.Server.Migrations
 {
-    [DbContext(typeof(Context))]
+    [DbContext(typeof(ImperitContext))]
     partial class ContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

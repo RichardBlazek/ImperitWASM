@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace ImperitWASM.Server.Migrations
 {
-    [DbContext(typeof(Context))]
+    [DbContext(typeof(ImperitContext))]
     [Migration("20201125132348_Creation")]
     partial class Creation
     {

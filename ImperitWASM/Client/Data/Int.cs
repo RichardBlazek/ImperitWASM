@@ -1,7 +1,7 @@
 ﻿namespace ImperitWASM.Client.Data
 {
-	public class Int
+	public class Model<T>
 	{
-		public int Value { get; set; }
+		public T? Value { get; set; }
 	}
 }

@@ -4,7 +4,7 @@
 	[Parameter] public ImmutableArray<Point>? Points { get; set; }
 	[Parameter] public Color Fill { get; set; } = new Color();
 	[Parameter] public Color Stroke { get; set; } = new Color();
-	[Parameter] public int StrokeWidth { get; set; } = 0;
+	[Parameter] public double StrokeWidth { get; set; } = 0.0;
 	[Parameter] public Func<Task>? OnClickAsync { get; set; }
 	string Path => string.Join(" ", Points?.Select(point => Width * point.X + "," + Height * point.Y) ?? Enumerable.Empty<string>());
 	public void Select(ImmutableArray<Point>? points, Color fill)

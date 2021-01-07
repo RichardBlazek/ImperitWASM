@@ -27,5 +27,4 @@
 		<ProjectReference Include="..\Shared\ImperitWASM.Shared.csproj" />
 	</ItemGroup>
 
-
 </Project>

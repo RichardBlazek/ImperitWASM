@@ -1,20 +1,20 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace ImperitWASM.Shared
 {
 	public static class ListExtensions
 	{
+		static readonly Random rand = new Random();
 		public static IEnumerable<int> Indices<T>(this IEnumerable<T> en, Func<T, bool> pred) => en.Select((v, i) => (v, i)).Where(x => pred(x.v)).Select(x => x.i);
 		public static T Must<T>(this T? value) where T : class => value ?? throw new ArgumentNullException(typeof(T).FullName);
 		public static T FirstOr<T>(this IEnumerable<T> e, T x) => e.DefaultIfEmpty(x).First();
+		public static IEnumerable<(int i, T v)> Index<T>(this IEnumerable<T> e) => e.Select((v, i) => (i, v));
 		public static T? MinBy<T, TC>(this IEnumerable<T> e, Func<T, TC> selector, T? v = default) where T : class => e.OrderBy(selector).FirstOr(v);
-		public static (ImmutableList<A>, P) Fold<A, P>(this IEnumerable<A> e, P init, Func<P, A, (P, A?)> fn) where A : class
+		public static (List<A>, P) Fold<A, P>(this IEnumerable<A> e, P init, Func<P, A, (P, A?)> fn) where A : class
 		{
-			var result = ImmutableList.CreateBuilder<A>();
+			var result = new List<A>();
 			foreach (var item in e)
 			{
 				var (next_init, added) = fn(init, item);
@@ -24,18 +24,13 @@ namespace ImperitWASM.Shared
 					result.Add(added);
 				}
 			}
-			return (result.ToImmutable(), init);
+			return (result, init);
 		}
-		public static ImmutableDictionary<T, int> Lookup<T>(this IEnumerable<T> e) where T : notnull => e.Select((a, i) => (a, i)).ToImmutableDictionary(it => it.a, it => it.i);
-		public static int FirstRotated<T>(this IReadOnlyList<T> arr, int shift, Func<T, bool> cond, int otherwise)
+		public static IEnumerable<T> Replace<T, TC>(this IEnumerable<T> e, Func<TC, bool> cond, Func<TC, TC, TC> interact, TC init) where T : class where TC : T
 		{
-			return Enumerable.Range(shift, arr.Count).Where(i => cond(arr[i % arr.Count])).FirstOr(otherwise) % arr.Count;
-		}
-		public static ImmutableList<T> Replace<T, TC>(this ImmutableList<T> lst, Predicate<TC> cond, Func<TC, TC, TC> join, TC init) where T : class where TC : T
-		{
-			var those = lst.OfType<TC>().Where(x => cond(x));
-			var result = lst.RemoveAll(x => x is TC tc && cond(tc));
-			return result.Add(those.Aggregate(init, join));
+			var selected = e.OfType<TC>().Where(cond);
+			var remaining = e.Where(x => x is not TC y || !cond(y));
+			return remaining.Append(selected.Aggregate(init, interact));
 		}
 		public static void Each<T>(this IEnumerable<T> e, Action<T> action)
 		{
@@ -53,44 +48,47 @@ namespace ImperitWASM.Shared
 				++i;
 			}
 		}
-		public static async Task EachAsync<T>(this IEnumerable<T> e, Func<T, Task> action)
+		public static List<T> Combine<T>(this IEnumerable<T> first, IEnumerable<T> second, Func<T, T, bool> eq, Func<T, T, T> match)
 		{
-			foreach (var item in e)
+			var result = new List<T>(first);
+			foreach (var t2 in second)
 			{
-				await action(item);
-			}
-		}
-		public static async Task EachAsync<T>(this IEnumerable<T> e, Func<T, int, Task> action)
-		{
-			int i = 0;
-			foreach (var item in e)
-			{
-				await action(item, i);
-				++i;
-			}
-		}
-		public static int? Find<T>(this IList<T> ts, Func<T, bool> cond)
-		{
-			int i = 0;
-			while (i < ts.Count && !cond(ts[i]))
-			{
-				++i;
-			}
-			return i < ts.Count ? (int?)i : null;
-		}
-		public static void InsertMatch<T>(this IList<T> s1, IEnumerable<T> s2, Func<T, T, bool> eq, Func<T, T, T> match)
-		{
-			foreach (var t2 in s2)
-			{
-				int? index = s1.Find(t1 => eq(t1, t2));
-				if (index is int i)
+				int i = result.FindIndex(t1 => eq(t1, t2));
+				if (i != -1)
 				{
-					s1[i] = match(s1[i], t2);
+					result[i] = match(result[i], t2);
 				}
 				else
 				{
-					s1.Add(t2);
+					result.Add(t2);
 				}
+			}
+			return result;
+		}
+		public static IEnumerable<T> Range<T>(this int count, Func<int, T> selector) => Enumerable.Range(0, count).Select(selector);
+		public static void Shuffle<T>(this IList<T> list)
+		{
+			for (int i = 0, len = list.Count; i < len - 1; ++i)
+			{
+				int r = i + rand.Next(len - i);
+				var tmp = list[r];
+				list[r] = list[i];
+				list[i] = tmp;
+			}
+		}
+		public static List<T> Shuffled<T>(this IEnumerable<T> e)
+		{
+			var list = e.ToList();
+			list.Shuffle();
+			return list;
+		}
+		public static IEnumerable<TR> SelectAccumulate<T, TA, TR>(this IEnumerable<T> e, TA accumulator, Func<T, TA, (TR, TA)> selector)
+		{
+			foreach (var item in e)
+			{
+				var (new_item, new_accumulator) = selector(item, accumulator);
+				accumulator = new_accumulator;
+				yield return new_item;
 			}
 		}
 	}

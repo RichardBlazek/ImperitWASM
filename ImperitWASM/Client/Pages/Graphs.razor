@@ -1,6 +1,6 @@
 ﻿@code{
 	[Parameter] public ImmutableArray<Color> Players { get; set; }
-	[Parameter] public ImmutableArray<PlayersPower> Powers { get; set; }
+	[Parameter] public ImmutableArray<ImmutableArray<Power>> Powers { get; set; }
 	static IEnumerable<string> Parts(IEnumerable<int> y_values, int count, int max_y, int x_offset, int y_offset, int width, int height)
 	{
 		return y_values.Select((y, x) => ((long)x * width / (count - 1) + x_offset) + "," + ((long)height - y * height / max_y + y_offset));
@@ -13,12 +13,12 @@
 }
 @if (!Players.IsDefaultOrEmpty && Powers is { IsDefault: false, Length: > 6 })
 {
-	var TotalAvg = Powers.Select(p => p.TotalAvg);
-	var TotalMax = Powers.Max(p => p.TotalMax);
-	var Ratios = Powers.Select(p => p.GetRatios()).ToImmutableArray();
+	var TotalAvg = Powers.Select(ps => (int)ps.Average(p => p.Total));
+	var TotalMax = Powers.Max(ps => ps.Max(p => p.Total));
+	var Ratios = Powers.Select(ps => { var sum = ps.Sum(p => p.Military); return ps.Select(p => (double)p.Military / sum).ToImmutableArray(); }).ToImmutableArray();
 	var RatioSums = new double[Ratios.Length];
 	var Lives = Players.Select((_, i) => Math.Min(Powers.Length, Powers.Count(p => p[i].Alive) + 1)).ToImmutableArray();
-	var Changes = Powers.Zip(Powers.Skip(1), (prev, next) => next.ChangesFrom(prev)).ToImmutableArray();
+	var Changes = Powers.Pairs((prev, next) => prev.Zip(next, (p, n) => (n - p) / (double)p.Total).ToImmutableArray()).ToImmutableArray();
 
 	<p>Síla:</p>
 	<svg viewBox="-10 -10 1220 620" class="diagram">

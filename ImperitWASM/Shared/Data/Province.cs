@@ -1,79 +1,76 @@
-using System;
 using System.Collections.Immutable;
 using System.Linq;
-using ImperitWASM.Shared.Config;
+using ImperitWASM.Shared.Value;
 
 namespace ImperitWASM.Shared.Data
 {
-	public abstract record Province(string Name, Shape Shape, Player Player, Soldiers Soldiers, Soldiers DefaultSoldiers, ImmutableList<IProvinceAction> Actions, Settings Settings)
+	public record Province
 	{
-		public Description Description => new Description(Name, Text);
-		public abstract ImmutableArray<string> Text { get; }
-		public ImmutableArray<Point> Border => Shape.Border;
-		public Point Center => Shape.Center;
-
-		public Province ConqueredBy(Player player) => this with { Player = player };
-		public Province WithSoldiers(Soldiers soldiers) => this with { Soldiers = soldiers };
-		Province WithActions(ImmutableList<IProvinceAction> new_actions) => this with { Actions = new_actions };
-
-		public Province Revolt() => ConqueredBy(Settings.Savage).WithSoldiers(DefaultSoldiers);
-		public virtual bool WillRevolt(Player active) => !CanSoldiersSurvive;
-		public Province RevoltIfNecessary(Player active) => WillRevolt(active) ? Revolt() : this;
-
-		public virtual bool Inhabitable => false;
-		public Province Add(params IProvinceAction[] actions) => WithActions(Actions.AddRange(actions));
-		public Province Replace(Func<IProvinceAction, IProvinceAction> replacer) => WithActions(Actions.Select(replacer).ToImmutableList());
-
-		Province ActOnYourself(PlayersAndProvinces pap)
+		public long GameId { get; private set; }
+		public int RegionId { get; private set; }
+		public virtual Region Region { get; private set; }
+		public virtual Player? Player { get; private set; }
+		public virtual Soldiers Soldiers { get; private set; }
+		public virtual Settings Settings { get; private set; }
+		public Province(long gameId, Region region, Soldiers soldiers, Settings settings)
 		{
-			var (a, p) = Actions.Fold(this, (province, action) => action.Perform(province, pap));
-			return p.WithActions(a);
+			GameId = gameId;
+			(Region, RegionId) = (region, region.Id);
+			(Soldiers, Settings) = (soldiers, settings);
 		}
 
-		(Province, Player) Act(Player player, PlayersAndProvinces pap)
-		{
-			var (a, p) = Actions.Fold(player, (player, action) => action.Perform(player, pap));
-			return (WithActions(a), p);
-		}
-		public (Province, ImmutableArray<Player>.Builder) Act(PlayersAndProvinces pap)
-		{
-			var province = ActOnYourself(pap);
-			var new_players = ImmutableArray.CreateBuilder<Player>(pap.PlayersCount);
-			foreach (var player in pap.Players)
-			{
-				var (new_province, new_player) = province.Act(player, pap);
-				province = new_province;
-				new_players.Add(new_player);
-			}
-			return (province, new_players);
-		}
-		public Soldiers NextSoldiers(PlayersAndProvinces pap) => ActOnYourself(pap).Soldiers;
-		public Soldiers MaxAttackers(PlayersAndProvinces pap, Province to) => Soldiers.MaxAttackers(pap, this, to);
+		public int Score => Region.Score;
+		public int Income => Region.Income;
+		public int Price => Region.Price;
+		public int DefaultDefensePower => Region.DefensePower;
+
+		public Point Center => Region.Center;
+		public ImmutableArray<Point> Border => Region.Border;
+		public string Name => Region.Name;
+		public ImmutableArray<string> Text => Region.Text(Soldiers);
+
+		public Province RuledBy(Player player) => this with { Player = player };
+		public Province Revolt() => this with { Player = null, Soldiers = DefaultSoldiers };
+		public bool IsShaky(Player active) => !CanPersist || !Soldiers.Any || (IsAllyOf(active) && Region.IsShaky(Soldiers));
+		public Province RevoltIfShaky(Player active) => IsShaky(active) ? Revolt() : this;
+
+		public Ratio Instability => Region.Instability(Soldiers);
 		public int AttackPower => Soldiers.AttackPower;
 		public int DefensePower => Soldiers.DefensePower;
 		public int Power => Soldiers.Power;
-		public int DefaultDefensePower => DefaultSoldiers.DefensePower;
+		public int SoldierPrice => Soldiers.Price;
+		public Soldiers MaxMovable(Provinces provinces, Province to) => Soldiers.MaxMovable(provinces, this, to);
+		public Soldiers DefaultSoldiers => Region.Soldiers;
 
-		public Province Subtract(Soldiers army) => WithSoldiers(Soldiers.Subtract(army));
-		public Province Reinforce(Soldiers another) => WithSoldiers(Soldiers.Add(another));
-		public Province AttackedBy(Player p, Soldiers s) => ConqueredBy(s.AttackPower > Soldiers.DefensePower ? p : Player).WithSoldiers(Soldiers.AttackedBy(s));
-		public bool Inhabited => Player is not Savage;
-		public bool IsAllyOf(Player p) => p == Player;
-		public bool IsAllyOf(Province prov) => prov.Player == Player;
-		public bool IsEnemyOf(Player p) => Inhabited && p != Player;
+		public Province Add(Soldiers another) => this with { Soldiers = Soldiers.Add(another) };
+		public Province Subtract(Soldiers army) => this with { Soldiers = Soldiers.Subtract(army) };
+		Province AttackedBy(Player p, Soldiers s) => this with { Player = s.AttackPower > Soldiers.DefensePower ? p : Player, Soldiers = Soldiers.AttackedBy(s) };
+		public Province VisitedBy(Player p, Soldiers s) => IsAllyOf(p) ? Add(s) : AttackedBy(p, s);
+
+		public bool Inhabited => Player is not null;
+		public bool Inhabitable => Region.Inhabitable && !Inhabited;
+		public bool IsAllyOf(Player? other) => Inhabited && other == Player;
+		public bool IsAllyOf(Province province) => province.IsAllyOf(Player);
+		public bool IsEnemyOf(Player other) => Inhabited && !IsAllyOf(other);
+		public bool IsRecruitable(SoldierType type) => Region.IsRecruitable(type);
 
 		public bool Has(Soldiers soldiers) => Soldiers.Contains(soldiers);
 		public bool HasSoldiers => Soldiers.Any;
-		public bool CanSoldiersSurvive => Soldiers.CanSurviveIn(this);
-		public bool CanSurviveWithout(Soldiers s) => Subtract(s).CanSoldiersSurvive;
-		public bool CanAnyMove(PlayersAndProvinces pap, Province to) => Soldiers.Any(reg => reg.CanMoveAlone(pap, this, to));
-		public bool CanMove(PlayersAndProvinces pap, Province to, Player player, Soldiers soldiers) => IsAllyOf(player) && soldiers.CanMove(pap, this, to) && CanSurviveWithout(soldiers);
+		public bool CanPersist => Soldiers.CanSurviveIn(this);
+		public bool CanPersistWithout(Soldiers s) => Subtract(s).CanPersist;
+		public bool CanAnyMove(Provinces provinces, Province to) => Soldiers.Any(reg => reg.CanMoveAlone(provinces, this, to));
+		public bool CanMove(Provinces provinces, Province to, Soldiers soldiers) => soldiers.CanMove(provinces, this, to) && CanPersistWithout(soldiers);
 
-		public virtual Color Fill => new Color();
-		public virtual Color Stroke => new Color();
-		public virtual int StrokeWidth => 0;
+		public bool Sailable => Region.Sailable;
+		public bool Walkable => Region.Walkable;
+		public bool Dry => Region.Dry;
+		public bool Port => Region.Port;
 
-		public virtual bool Equals(Province? other) => other is not null && other.Name == Name;
-		public override int GetHashCode() => Name.GetHashCode();
+		public Color Fill => Player.ColorOf(Player).Over(Region.Fill);
+		public Color Stroke => Region.Stroke;
+		public float StrokeWidth => Region.StrokeWidth;
+
+		public virtual bool Equals(Province? other) => other is not null && other.RegionId == RegionId;
+		public override int GetHashCode() => Region.GetHashCode();
 	}
 }

@@ -16,11 +16,13 @@ namespace ImperitWASM.Server
 		{
 			_ = services.AddControllersWithViews();
 			_ = services.AddRazorPages();
-			_ = services.AddDbContext<Context>()
-					.AddSingleton(s => Config.Load(System.AppDomain.CurrentDomain.BaseDirectory ?? ".", "Files/Settings.json"))
-					.AddTransient<IContextService, ContextService>().AddTransient<ISessionService, SessionService>()
-					.AddTransient<IPlayersProvinces, PlayersProvinces>().AddTransient<IGameService, GameService>()
-					.AddTransient<IActive, Active>().AddTransient<IGameCreator, GameCreator>().AddTransient<IEndOfTurn, EndOfTurn>();
+			_ = services.AddDbContext<ImperitContext>(ServiceLifetime.Singleton).AddSingleton<ISettings, SettingsLoader>()
+						.AddSingleton(_ => GraphLoader.Graph(System.AppDomain.CurrentDomain.BaseDirectory ?? ".", "Files/Graph.json"))
+						.AddTransient<IPowers, PowerLoader>().AddTransient<ISessions, SessionLoader>()
+						.AddTransient<IProvinces, ProvinceLoader>().AddTransient<IGames, GameLoader>()
+						.AddTransient<IPlayers, PlayerLoader>().AddTransient<IGameCreator, GameCreator>()
+						.AddTransient<ICommands, CommandProvider>().AddTransient<IEndOfTurn, EndOfTurn>()
+						.AddTransient<ISessions, SessionLoader>();
 		}
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 		{

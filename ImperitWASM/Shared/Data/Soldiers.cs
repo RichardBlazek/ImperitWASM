@@ -1,33 +1,30 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
-using ImperitWASM.Shared.Config;
 
 namespace ImperitWASM.Shared.Data
 {
-	public record Soldiers(ImmutableArray<Regiment> Regiments) : IEnumerable<Regiment>
+	public record Soldiers : IEnumerable<Regiment>
 	{
-		public Soldiers() : this(ImmutableArray<Regiment>.Empty) { }
-		public Soldiers(IEnumerable<Regiment> list) : this(list.ToImmutableArray()) { }
-		public Soldiers(params Regiment[] list) : this(list.ToImmutableArray()) { }
-		public Soldiers(SoldierType type, int count) : this(ImmutableArray.Create(new Regiment(type, count))) { }
+		public int Id { get; private set; }
+		public virtual IList<Regiment> Regiments { get; private set; }
+		public Soldiers() => Regiments = new List<Regiment>();
+		public Soldiers(IList<Regiment> regiments) => Regiments = regiments;
+		public Soldiers(IEnumerable<Regiment> regiments) => Regiments = regiments.ToList();
+		public Soldiers(SoldierType type, int count) => Regiments = new List<Regiment> { new Regiment(type, count) };
+
 		public Soldiers Add(Soldiers s)
 		{
-			var res = Regiments.ToBuilder();
-			res.InsertMatch(s.Where(p => p.Count > 0), (a, b) => a.Type == b.Type, (a, b) => new Regiment(a.Type, a.Count + b.Count));
-			return new Soldiers(res.ToImmutable());
+			return new Soldiers(Regiments.Combine(s.Where(p => p.Count > 0), (a, b) => a.Type == b.Type, (a, b) => new Regiment(a.Type, a.Count + b.Count)));
+		}
+		public Soldiers Subtract(Soldiers s)
+		{
+			return new Soldiers(Regiments.Combine(s.Where(p => p.Count > 0), (a, b) => a.Type == b.Type, (a, b) => new Regiment(a.Type, a.Count - b.Count)));
 		}
 		public bool Contains(Soldiers s)
 		{
 			return s.Regiments.All(s2 => Regiments.Any(s1 => s1.Type == s2.Type && s1.Count >= s2.Count));
-		}
-		public Soldiers Subtract(Soldiers s)
-		{
-			var res = Regiments.ToBuilder();
-			res.InsertMatch(s.Where(p => p.Count > 0), (a, b) => a.Type == b.Type, (a, b) => new Regiment(a.Type, a.Count - b.Count));
-			return new Soldiers(res.Where(x => x.Count > 0).ToImmutableArray());
 		}
 		public static Soldiers operator +(Soldiers s1, Soldiers s2) => s1.Add(s2);
 		public static Soldiers operator -(Soldiers s1, Soldiers s2) => s1.Subtract(s2);
@@ -41,23 +38,28 @@ namespace ImperitWASM.Shared.Data
 		public int Count => Regiments.Sum(p => p.Count);
 		public bool Any => Regiments.Any(p => p.Count > 0);
 
-		public int Length => Regiments.Length;
+		public int Length => Regiments.Count;
 		public Regiment this[int index] => Regiments[index];
 
-		public int Capacity(PlayersAndProvinces pap, Province from, Province to)
+		public int CountOf(SoldierType type) => Regiments.FirstOrDefault(regiment => regiment.Type == type)?.Count ?? 0;
+		public int Capacity(Provinces pap, Province from, Province to)
 		{
 			return Regiments.Sum(p => p.CanMove(pap, from, to) - p.Weight);
 		}
-		public bool CanMove(PlayersAndProvinces pap, Province from, Province to)
+		public bool CanMove(Provinces pap, Province from, Province to)
 		{
 			return Any && from.Has(this) && Capacity(pap, from, to) >= 0;
 		}
 		public bool CanSurviveIn(Province province) => Regiments.Sum(p => p.CanSustain(province) - p.Weight) >= 0;
 
-		int[] Fight(int me, int enemy, Func<SoldierType, int> powerof)
+		int[] Fight(int enemy, Func<SoldierType, int> powerof)
 		{
-			int died = 0;
-			int[] remaining = new int[Regiments.Length];
+			int me = Regiments.Sum(regiment => powerof(regiment.Type)), died = 0;
+			int[] remaining = new int[Regiments.Count];
+			if (enemy > me)
+			{
+				return remaining;
+			}
 			for (int i = 0; i < remaining.Length; ++i)
 			{
 				if (powerof(Regiments[i].Type) > 0)
@@ -82,27 +84,28 @@ namespace ImperitWASM.Shared.Data
 			}
 			return remaining;
 		}
-		public Soldiers AttackedBy(int power) => new Soldiers(Fight(DefensePower, power, type => type.DefensePower).Select((count, i) => new Regiment(Regiments[i].Type, count)).Where(pair => pair.Count > 0));
+		public Soldiers FightAgainst(int power, Func<SoldierType, int> powerof)
+		{
+			return new Soldiers(Fight(power, powerof).Select((count, i) => new Regiment(Regiments[i].Type, count)).Where(pair => pair.Count > 0));
+		}
 		public Soldiers AttackedBy(Soldiers s2)
 		{
 			int defensePower = DefensePower, attackPower = s2.AttackPower;
-			var (s, power1, power2, powerof) = defensePower >= attackPower
-					? (this, defensePower, attackPower, (Func<SoldierType, int>)(type => type.DefensePower))
-					: (s2, attackPower, defensePower, type => type.AttackPower);
-			var remaining = s.Fight(power1, power2, powerof).Select((count, i) => new Regiment(s[i].Type, count));
-			return new Soldiers(remaining.Where(pair => pair.Count > 0));
+			return defensePower >= attackPower
+					? FightAgainst(attackPower, type => type.DefensePower)
+					: s2.FightAgainst(defensePower, type => type.AttackPower);
 		}
-		public Soldiers MaxAttackers(PlayersAndProvinces pap, Province from, Province to)
+		public Soldiers MaxMovable(Provinces provinces, Province from, Province to)
 		{
-			var result = new Soldiers(Regiments.Where(p => p.CanMoveAlone(pap, from, to)));
-			foreach (var p in Regiments.Where(p => !p.CanMoveAlone(pap, from, to)).OrderBy(p => p.Type.Weight - p.Type.CanMove(pap, from, to)))
+			var result = new Soldiers(Regiments.Where(p => p.CanMoveAlone(provinces, from, to)));
+			foreach (var p in Regiments.Where(p => !p.CanMoveAlone(provinces, from, to)).OrderBy(p => p.Type.Weight - p.Type.CanMove(provinces, from, to)))
 			{
-				result += new Soldiers(p.Type, Math.Min(result.Capacity(pap, from, to) / (p.Type.Weight - p.Type.CanMove(pap, from, to)), p.Count));
+				result += new Soldiers(p.Type, Math.Min(result.Capacity(provinces, from, to) / (p.Type.Weight - p.Type.CanMove(provinces, from, to)), p.Count));
 			}
 			return result;
 		}
-		public IEnumerator<Regiment> GetEnumerator() => (Regiments as IEnumerable<Regiment>).GetEnumerator();
+		public IEnumerator<Regiment> GetEnumerator() => Regiments.GetEnumerator();
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-		public override string ToString() => string.Join("", Regiments.Select(p => p.Count + p.Type.Symbol));
+		public override string ToString() => string.Join("", Regiments);
 	}
 }

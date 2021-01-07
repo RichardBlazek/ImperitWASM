@@ -1,15 +1,17 @@
-using System.Collections.Immutable;
-using ImperitWASM.Shared.Config;
+using ImperitWASM.Shared.Value;
 
 namespace ImperitWASM.Shared.Data
 {
-	public record Mountains(string Name, Shape Shape, Settings Settings)
-		: Province(Name, Shape, Settings.Savage, new Soldiers(), new Soldiers(), ImmutableList<IProvinceAction>.Empty, Settings)
+	public record Mountains : Region
 	{
-		public override ImmutableArray<string> Text => ImmutableArray<string>.Empty;
-		public virtual bool Equals(Mountains? other) => other is not null && other.Name == Name;
-		public override int GetHashCode() => base.GetHashCode();
+		public Mountains(string name, Shape shape, Soldiers soldiers, Settings settings) : base(name, shape, soldiers, settings) { }
+
 		public override Color Stroke => Settings.MountainsColor;
-		public override int StrokeWidth => Settings.MountainsWidth;
+		public override float StrokeWidth => Settings.MountainsWidth;
+
+		public override bool Dry => true;
+
+		public virtual bool Equals(Mountains? region) => region is not null && Id == region.Id;
+		public override int GetHashCode() => Id.GetHashCode();
 	}
 }
