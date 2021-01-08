@@ -2,16 +2,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 
 namespace ImperitWASM.Shared.Value
 {
-	public sealed record Graph(ImmutableArray<int> Edges, ImmutableArray<int> Starts) : IReadOnlyList<IEnumerable<int>>
+	public sealed record Graph(ImmutableArray<ImmutableArray<int>> Neighbors) : IReadOnlyList<ImmutableArray<int>>
 	{
-		public int NeighborCount(int vertex) => Starts[vertex + 1] - Starts[vertex];
-		public IEnumerable<int> this[int vertex] => Edges.Take(Starts[vertex + 1]).Skip(Starts[vertex]);
-		public int Count => Starts.Length - 1;
-		public IEnumerator<IEnumerable<int>> GetEnumerator() => Count.Range(i => this[i]).GetEnumerator();
+		public int NeighborCount(int vertex) => Neighbors[vertex].Length;
+		public ImmutableArray<int> this[int vertex] => Neighbors[vertex];
+		public int Count => Neighbors.Length;
+		public IEnumerator<ImmutableArray<int>> GetEnumerator() => (Neighbors as IEnumerable<ImmutableArray<int>>).GetEnumerator();
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
 		public bool Passable(int from, int to, int limit, Func<int, int, int> difficulty)
@@ -25,7 +24,8 @@ namespace ImperitWASM.Shared.Value
 				{
 					return true;
 				}
-				for (int n = Starts[stack[i].Pos], stop = Starts[stack[i].Pos + 1], vertex = Edges[n]; n < stop; ++n, vertex = Edges[n])
+				var neighbors = Neighbors[stack[i].Pos];
+				for (int n = 0, vertex = neighbors[n]; n < neighbors.Length; ++n, vertex = neighbors[n])
 				{
 					if (!visited[n] && stack[i].Distance + difficulty(stack[i].Pos, vertex) <= limit)
 					{
@@ -48,7 +48,8 @@ namespace ImperitWASM.Shared.Value
 					var points = new List<int> { from };
 					for (int i = 0; i < points.Count; ++i)
 					{
-						for (int n = Starts[points[i]], stop = Starts[points[i] + 1], vertex = Edges[n]; n < stop; ++n, vertex = Edges[n])
+						var neighbors = Neighbors[points[i]];
+						for (int n = 0, vertex = neighbors[n]; n < neighbors.Length; ++n, vertex = neighbors[n])
 						{
 							if (!visited[vertex] && passable(points[i], vertex))
 							{

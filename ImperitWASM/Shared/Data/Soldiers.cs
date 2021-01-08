@@ -1,14 +1,13 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace ImperitWASM.Shared.Data
 {
-	public record Soldiers
+	public sealed record Soldiers
 	{
 		public int Id { get; private set; }
-		public virtual IList<Regiment> Regiments { get; private set; }
+		public IList<Regiment> Regiments { get; private set; }
 		public Soldiers() => Regiments = new List<Regiment>();
 		public Soldiers(IList<Regiment> regiments) => Regiments = regiments;
 		public Soldiers(IEnumerable<Regiment> regiments) => Regiments = regiments.ToList();

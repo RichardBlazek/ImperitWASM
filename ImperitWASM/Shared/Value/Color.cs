@@ -11,10 +11,9 @@ namespace ImperitWASM.Shared.Value
 		public static Color Parse(string str) => new Color(FromHex(str[1..3]), FromHex(str[3..5]), FromHex(str[5..7]), str.Length < 9 ? (byte)255 : FromHex(str[7..9]));
 		public override string ToString() => "#" + ToHex(R) + ToHex(G) + ToHex(B) + ToHex(A);
 
-		static byte Mix(byte a, byte b, int w1, int w2) => (byte)(((a * w1) + (b * w2)) / (w1 + w2));
+		static byte Mix(byte a, byte b, byte w1, byte w2) => w1 + w2 == 0 ? 0 : (byte)(((a * w1) + (b * w2)) / (w1 + w2));
 		static byte Supl(byte x, byte y) => (byte)(255 - ((255 - x) * (255 - y) / 255));
 		public Color Mix(Color color) => new Color(Mix(R, color.R, A, color.A), Mix(G, color.G, A, color.A), Mix(B, color.B, A, color.A), Supl(A, color.A));
-		public Color Over(Color color) => new Color(Mix(R, color.R, 255, 255 - A), Mix(G, color.G, 255, 255 - A), Mix(B, color.B, 255, 255 - A), Supl(A, color.A));
 
 		public byte Light() => (byte)((R + G + B) / 3);
 		public Color WithAlpha(byte alpha) => this with { A = alpha };

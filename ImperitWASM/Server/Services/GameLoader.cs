@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading.Tasks;
 using ImperitWASM.Server.Load;
 using ImperitWASM.Shared.Data;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,7 @@ namespace ImperitWASM.Server.Services
 {
 	public interface IGames
 	{
+		Task<Game> AddAsync();
 		Game? Find(int gameId);
 		Game? Update(int gameId, Func<Game, Game> update);
 		Game Update(Game game);
@@ -21,6 +23,12 @@ namespace ImperitWASM.Server.Services
 		readonly ImperitContext ctx;
 		public GameLoader(ImperitContext ctx) => this.ctx = ctx;
 
+		public async Task<Game> AddAsync()
+		{
+			var game = ctx.Games!.Add(new Game()).Entity;
+			_ = await ctx.SaveChangesAsync();
+			return game;
+		}
 		public void RemoveOld(DateTime limit) => ctx.Games!.RemoveRange(ctx.Games.Where(game => game.Current == Game.State.Finished && game.FinishTime < limit));
 		public Game? Find(int gameId) => ctx.Games.AsNoTracking().SingleOrDefault(game => game.Id == gameId);
 		public Game? Update(int gameId, Func<Game, Game> update) => Find(gameId) is Game g ? ctx.Games!.Update(g).Entity : null;

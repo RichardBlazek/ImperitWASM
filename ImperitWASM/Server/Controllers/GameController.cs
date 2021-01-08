@@ -67,7 +67,7 @@ namespace ImperitWASM.Server.Controllers
 		[HttpPost("NextTurn")]
 		public async Task<bool> NextTurnAsync([FromBody] Session ses)
 		{
-			return players[ses.P] is Player { IsActive: true } player && session.IsValid(ses) && await eot.NextTurnAsync(player.GameId, ses.P);
+			return players[ses.P] is { IsActive: true } player && session.IsValid(ses) && await eot.NextTurnAsync(player.GameId, ses.P);
 		}
 		[HttpPost("History")]
 		public HistoryRecord? History([FromBody] string name)

@@ -1,11 +1,9 @@
-﻿
-
-namespace ImperitWASM.Shared.Data
+﻿namespace ImperitWASM.Shared.Data
 {
-	public record Regiment
+	public sealed record Regiment
 	{
 		public int Id { get; private set; }
-		public virtual SoldierType Type { get; private set; }
+		public SoldierType Type { get; private set; }
 		public int Count { get; private set; }
 		public Regiment(SoldierType type, int count) => (Type, Count) = (type, count);
 

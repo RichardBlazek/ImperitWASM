@@ -13,9 +13,9 @@ namespace ImperitWASM.Shared.Data
 		public Color Color { get; private set; }
 		public int Money { get; private set; }
 		public bool Alive { get; private set; }
-		public virtual ICollection<Action>? ActionList { get; private set; }
+		public ICollection<Action>? ActionList { get; private set; }
 		public ImmutableArray<Action> Actions => ActionList!.ToImmutableArray();
-		public virtual Settings Settings { get; private set; }
+		public Settings Settings { get; private set; }
 		public bool IsActive { get; private set; }
 		public Player(string name, int gameId, int order, Color color, int money, bool alive, Settings settings, bool isActive) => (Name, GameId, Order, Color, Money, Alive, Settings, IsActive) = (name, gameId, order, color, money, alive, settings, isActive);
 

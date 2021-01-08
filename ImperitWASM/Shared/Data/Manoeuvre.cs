@@ -4,9 +4,9 @@ namespace ImperitWASM.Shared.Data
 {
 	public record Manoeuvre : Action
 	{
-		public virtual Province Province { get; private set; }
+		public Province Province { get; private set; }
 		public int SoldiersId { get; private set; }
-		public virtual Soldiers Soldiers { get; private set; }
+		public Soldiers Soldiers { get; private set; }
 		public Manoeuvre(Province province, Soldiers soldiers)
 		{
 			Province = province;

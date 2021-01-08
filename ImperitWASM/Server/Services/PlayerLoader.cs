@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using ImperitWASM.Server.Load;
 using ImperitWASM.Shared.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace ImperitWASM.Server.Services
 {
@@ -21,9 +22,11 @@ namespace ImperitWASM.Server.Services
 	{
 		readonly ImperitContext ctx;
 		public PlayerLoader(ImperitContext ctx) => this.ctx = ctx;
-
-		public ImmutableArray<Player> this[int gameId] => ctx.Players!.AsNoTracking().Where(player => player.GameId == gameId).OrderBy(player => player.Order).AsEnumerable().ToImmutableArray();
-		public Player? this[string? name] => ctx.Players!.AsNoTracking().SingleOrDefault(player => player.Name == name);
+		IQueryable<Player> Included => ctx.Players!.Include(p => p.Settings).Include(p => p.ActionList)
+			.Include(p => p.ActionList!.Where(a => a as Manoeuvre != null)).ThenInclude<Player, Action, Province>(a => ((Manoeuvre)a)!.Province).ThenInclude(p => p.Region)
+			.Include(p => p.ActionList!.Where(a => a as Manoeuvre != null)).ThenInclude<Player, Action, Soldiers>(a => ((Manoeuvre)a)!.Soldiers).ThenInclude(s => s.Regiments).ThenInclude(r => r.Type);
+		public ImmutableArray<Player> this[int gameId] => Included.AsNoTracking().Where(player => player.GameId == gameId).OrderBy(player => player.Order).AsEnumerable().ToImmutableArray();
+		public Player? this[string? name] => Included.AsNoTracking().SingleOrDefault(player => player.Name == name);
 		public void Add(Player player) => ctx.Players!.Add(player);
 		public Task UpdateAsync(IEnumerable<Player> players)
 		{

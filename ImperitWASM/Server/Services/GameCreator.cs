@@ -21,29 +21,29 @@ namespace ImperitWASM.Server.Services
 		readonly IGames gs;
 		readonly ISettings sl;
 		readonly ImperitContext ctx;
-		public GameCreator(IProvinces provinces, IGames game, ISettings sl, ImperitContext ctx, IPlayers players)
+		public GameCreator(IProvinces provinces, IGames gs, ISettings sl, ImperitContext ctx, IPlayers players)
 		{
 			this.provinces = provinces;
-			this.gs = game;
+			this.gs = gs;
 			this.sl = sl;
 			this.ctx = ctx;
 			this.players = players;
 		}
 		public async Task<int> CreateAsync()
 		{
-			int id = ctx.Games!.Add(new Game()).Entity.Id;
+			var game = await gs.AddAsync();
 			gs.RemoveOld(DateTime.UtcNow.AddDays(-1.0));
-			await provinces.AddAsync(sl.Settings.Provinces(id));
-			return id;
+			await provinces.AddAsync(sl.Settings.Provinces(game.Id));
+			return game.Id;
 		}
 		public Color NextColor(int gameId) => Settings.ColorOf(players[gameId].Length);
 		void Start(Game g)
 		{
 			var prov = provinces[g.Id];
-			foreach (var (land, robot) in sl.Settings.GetRobots(g.Id, players[g.Id].Length, prov.Inhabitable, players.ObsfuscateName))
+			foreach (var (land, robot) in sl.Settings.GetRobots(g.Id, players[g.Id].Length, prov.Inhabitable.Shuffled(), players.ObsfuscateName))
 			{
 				players.Add(robot);
-				_ = ctx.Provinces!.Update(prov[land].RuledBy(robot));
+				provinces.Update(prov[land].RuledBy(robot));
 			}
 		}
 		public Task StartAllAsync()

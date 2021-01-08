@@ -1,18 +1,17 @@
 using System.Collections.Immutable;
-using System.Linq;
 using ImperitWASM.Shared.Value;
 
 namespace ImperitWASM.Shared.Data
 {
-	public record Province
+	public sealed record Province
 	{
 		public int Id { get; private set; }
 		public int GameId { get; private set; }
 		public int RegionId { get; private set; }
-		public virtual Region Region { get; private set; }
-		public virtual Player? Player { get; private set; }
-		public virtual Soldiers Soldiers { get; private set; }
-		public virtual Settings Settings { get; private set; }
+		public Region Region { get; private set; }
+		public Player? Player { get; private set; }
+		public Soldiers Soldiers { get; private set; }
+		public Settings Settings { get; private set; }
 		public Province(int gameId, Region region, Soldiers soldiers, Settings settings)
 		{
 			GameId = gameId;
@@ -67,11 +66,11 @@ namespace ImperitWASM.Shared.Data
 		public bool Dry => Region.Dry;
 		public bool Port => Region.Port;
 
-		public Color Fill => Player.ColorOf(Player).Over(Region.Fill);
+		public Color Fill => Player.ColorOf(Player).Mix(Region.Fill);
 		public Color Stroke => Region.Stroke;
 		public float StrokeWidth => Region.StrokeWidth;
 
-		public virtual bool Equals(Province? other) => other is not null && other.RegionId == RegionId;
+		public bool Equals(Province? other) => other is not null && other.RegionId == RegionId;
 		public override int GetHashCode() => Region.GetHashCode();
 
 #pragma warning disable CS8618

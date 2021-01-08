@@ -29,7 +29,7 @@ namespace ImperitWASM.Shared.Data
 		IEnumerable<IEnumerable<Province>> Split(Func<Province, bool> relevant, Func<Province, Province, bool> passable) => Graph.Split(i => relevant(this[i]), (from, to) => passable(this[from], this[to])).Select(list => list.Select(i => this[i]));
 		public int IncomeOf(Player player) => Split(p => p.IsAllyOf(player), (from, to) => to.IsAllyOf(player)).DefaultIfEmpty().Max(prov => prov?.OfType<Land>()?.Sum(p => p.Earnings) ?? 0);
 
-		public IReadOnlyList<int> Inhabitable => Items.Indices(province => province.Inhabitable).Shuffled();
+		public IEnumerable<int> Inhabitable => Items.Indices(province => province.Inhabitable);
 		public (Human?, int) Winner => Items.GroupBy(province => province.Player).Where(g => g.Key is Human).Select(g => (g.Key, g.Sum(province => province.Score))).OrderBy(p => p.Item2).FirstOrDefault() is (Human human, int finals) ? (human, finals) : (null, 0);
 	}
 }
