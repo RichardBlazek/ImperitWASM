@@ -3,14 +3,16 @@ using System;
 using ImperitWASM.Server.Load;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace ImperitWASM.Server.Migrations
 {
     [DbContext(typeof(ImperitContext))]
-    partial class ImperitContextModelSnapshot : ModelSnapshot
+    [Migration("20210108142227_IM4")]
+    partial class IM4
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -482,9 +484,7 @@ namespace ImperitWASM.Server.Migrations
                     b.HasBaseType("ImperitWASM.Shared.Data.SoldierType");
 
                     b.Property<int>("Capacity")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("Capacity");
+                        .HasColumnType("INTEGER");
 
                     b.HasDiscriminator().HasValue("Ship");
                 });
@@ -494,26 +494,18 @@ namespace ImperitWASM.Server.Migrations
                     b.HasBaseType("ImperitWASM.Shared.Data.Pedestrian");
 
                     b.Property<int>("Capacity")
-                        .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("INTEGER")
-                        .HasColumnName("Capacity");
+                        .HasColumnName("Elephant_Capacity");
 
                     b.Property<int>("Speed")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("Speed");
+                        .HasColumnType("INTEGER");
 
                     b.HasDiscriminator().HasValue("Elephant");
                 });
 
             modelBuilder.Entity("ImperitWASM.Shared.Data.OutlandishShip", b =>
                 {
-                    b.HasBaseType("ImperitWASM.Shared.Data.Ship");
-
-                    b.Property<int>("Speed")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("Speed");
+                    b.HasBaseType("ImperitWASM.Shared.Data.Elephant");
 
                     b.HasDiscriminator().HasValue("OutlandishShip");
                 });

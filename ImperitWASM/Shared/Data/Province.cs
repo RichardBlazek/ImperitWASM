@@ -59,7 +59,7 @@ namespace ImperitWASM.Shared.Data
 		public bool HasSoldiers => Soldiers.Any;
 		public bool CanPersist => Soldiers.CanSurviveIn(this);
 		public bool CanPersistWithout(Soldiers s) => Subtract(s).CanPersist;
-		public bool CanAnyMove(Provinces provinces, Province to) => Soldiers.Any(reg => reg.CanMoveAlone(provinces, this, to));
+		public bool CanAnyMove(Provinces provinces, Province to) => Soldiers.CanAnyMove(provinces, this, to);
 		public bool CanMove(Provinces provinces, Province to, Soldiers soldiers) => soldiers.CanMove(provinces, this, to) && CanPersistWithout(soldiers);
 
 		public bool Sailable => Region.Sailable;

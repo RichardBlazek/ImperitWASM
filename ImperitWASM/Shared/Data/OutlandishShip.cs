@@ -1,9 +1,10 @@
 ﻿namespace ImperitWASM.Shared.Data
 {
-	public record OutlandishShip : Elephant
+	public record OutlandishShip : Ship
 	{
+		public int Speed { get; private set; }
 		public OutlandishShip(string name, string symbol, string text, int attackPower, int defensePower, int weight, int price, int capacity, int speed)
-			: base(name, symbol, text, attackPower, defensePower, weight, price, capacity, speed) { }
+			: base(name, symbol, text, attackPower, defensePower, weight, price, capacity) => Speed = speed;
 
 		int Difficulty(Province to) => to.Sailable ? 1 : Speed + 1;
 		public override int CanMove(Provinces provinces, Province from, Province dest)

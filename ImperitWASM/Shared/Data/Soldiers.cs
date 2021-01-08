@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace ImperitWASM.Shared.Data
 {
-	public record Soldiers : IEnumerable<Regiment>
+	public record Soldiers
 	{
 		public int Id { get; private set; }
 		public virtual IList<Regiment> Regiments { get; private set; }
@@ -16,11 +16,11 @@ namespace ImperitWASM.Shared.Data
 
 		public Soldiers Add(Soldiers s)
 		{
-			return new Soldiers(Regiments.Combine(s.Where(p => p.Count > 0), (a, b) => a.Type == b.Type, (a, b) => new Regiment(a.Type, a.Count + b.Count)));
+			return new Soldiers(Regiments.Combine(s.Regiments.Where(p => p.Count > 0), (a, b) => a.Type == b.Type, (a, b) => new Regiment(a.Type, a.Count + b.Count)));
 		}
 		public Soldiers Subtract(Soldiers s)
 		{
-			return new Soldiers(Regiments.Combine(s.Where(p => p.Count > 0), (a, b) => a.Type == b.Type, (a, b) => new Regiment(a.Type, a.Count - b.Count)));
+			return new Soldiers(Regiments.Combine(s.Regiments.Where(p => p.Count > 0), (a, b) => a.Type == b.Type, (a, b) => new Regiment(a.Type, a.Count - b.Count)));
 		}
 		public bool Contains(Soldiers s)
 		{
@@ -42,13 +42,17 @@ namespace ImperitWASM.Shared.Data
 		public Regiment this[int index] => Regiments[index];
 
 		public int CountOf(SoldierType type) => Regiments.FirstOrDefault(regiment => regiment.Type == type)?.Count ?? 0;
-		public int Capacity(Provinces pap, Province from, Province to)
+		public int Capacity(Provinces provinces, Province from, Province to)
 		{
-			return Regiments.Sum(p => p.CanMove(pap, from, to) - p.Weight);
+			return Regiments.Sum(p => p.CanMove(provinces, from, to) - p.Weight);
 		}
-		public bool CanMove(Provinces pap, Province from, Province to)
+		public bool CanMove(Provinces provinces, Province from, Province to)
 		{
-			return Any && from.Has(this) && Capacity(pap, from, to) >= 0;
+			return Any && from.Has(this) && Capacity(provinces, from, to) >= 0;
+		}
+		public bool CanAnyMove(Provinces provinces, Province from, Province to)
+		{
+			return Regiments.Any(reg => reg.CanMoveAlone(provinces, from, to));
 		}
 		public bool CanSurviveIn(Province province) => Regiments.Sum(p => p.CanSustain(province) - p.Weight) >= 0;
 
@@ -104,8 +108,6 @@ namespace ImperitWASM.Shared.Data
 			}
 			return result;
 		}
-		public IEnumerator<Regiment> GetEnumerator() => Regiments.GetEnumerator();
-		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 		public override string ToString() => string.Join("", Regiments);
 	}
 }

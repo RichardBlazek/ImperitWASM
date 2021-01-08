@@ -36,9 +36,9 @@ namespace ImperitWASM.Server.Load
 				_ = province.Ignore(p => p.Center).Ignore(p => p.Border);
 			}).Entity<Region>(region =>
 			{
-				_ = region.HasOne(r => r.Soldiers).WithOne().HasPrincipalKey<Soldiers>(r => r.Id).Required();
+				_ = region.HasOne(r => r.Soldiers).WithOne().HasForeignKey<Region>(r => r.SoldiersId).Required();
 				_ = region.HasMany(r => r.RegionSoldierTypes).WithOne().Required();
-				_ = region.HasOne(r => r.Shape).WithOne().HasPrincipalKey<Shape>(r => r.Id).Required();
+				_ = region.HasOne(r => r.Shape).WithOne().HasForeignKey<Region>(r => r.ShapeId).Required();
 				_ = region.Ignore(r => r.Center).Ignore(r => r.Border);
 			}).Entity<Player>(player =>
 			{
@@ -51,16 +51,21 @@ namespace ImperitWASM.Server.Load
 			{
 				_ = session.HasOne<Player>().WithMany().HasForeignKey(s => s.P).Required();
 				_ = session.HasCustomKey(s => s.Key);
-			}).Entity<Shape>(shape => shape.Ignore(s => s.Border).HasOne(s => s.Center).WithOne().HasForeignKey<Shape>(s => s.CenterId).Required())
+			}).Entity<Elephant>(elephant =>
+			{
+				_ = elephant.Property(e => e.Capacity).HasColumnName("Capacity");
+				_ = elephant.Property(e => e.Speed).HasColumnName("Speed");
+			}).Entity<Manoeuvre>(manoeuvre => manoeuvre.HasOne(m => m.Soldiers).WithOne().HasForeignKey<Manoeuvre>(m => m.SoldiersId).Required())
+			  .Entity<Shape>(shape => shape.Ignore(s => s.Border).HasOne(s => s.Center).WithOne().HasForeignKey<Shape>(s => s.CenterId).Required())
 			  .Entity<SoldierType>(type => type.HasCustomKey(t => t.Symbol))
 			  .Entity<RegionSoldierType>(recruitable => recruitable.HasOne(r => r.SoldierType).WithMany().Required())
-			  .Entity<Soldiers>(soldiers => soldiers.HasMany(s => s.Regiments).WithOne().Required())
+			  .Entity<Soldiers>(soldiers => soldiers.Ignore(s => s.Types).HasMany(s => s.Regiments).WithOne().Required())
 			  .Entity<Regiment>(regiment => regiment.HasOne(r => r.Type).WithMany().Required())
-			  .Entity<Game>(game => { }).Entity<Action>(action => { })
-			  .Entity<Manoeuvre>(manoeuvre => { }).Entity<Loan>(loan => { })
-			  .Entity<Human>(human => { }).Entity<Robot>(robot => { })
-			  .Entity<Land>(land => { }).Entity<Sea>(sea => { }).Entity<Mountains>(mountains => { })
-			  .Entity<Pedestrian>(_ => { }).Entity<Elephant>(_ => { }).Entity<Ship>(_ => { }).Entity<OutlandishShip>(_ => { });
+			  .Entity<Game>(game => { }).Entity<Action>(action => { }).Entity<Loan>(loan => { })
+			  .Entity<Human>(human => { }).Entity<Robot>(robot => { }).Entity<Land>(land => { })
+			  .Entity<Sea>(sea => { }).Entity<Mountains>(mountains => { }).Entity<Pedestrian>(_ => { })
+			  .Entity<Ship>(ship => ship.Property(s => s.Capacity).HasColumnName("Capacity"))
+			  .Entity<OutlandishShip>(ship => ship.Property(os => os.Speed).HasColumnName("Speed"));
 
 			base.OnModelCreating(mod);
 		}

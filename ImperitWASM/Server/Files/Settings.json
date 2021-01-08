@@ -139,7 +139,7 @@
 	"PlayerCount":16,
 	"SeaColor":{"R":17,"G":132,"B":255,"A":255},
 	"SoldierTypes":[
-		{"AttackPower":1,"DefensePower":1,"Description":{"Name":"P\u011b\u0161\u00e1k","Symbol":"\ud83d\udc68","Text":["S\u00edla v \u00fatoku: 1","S\u00edla v obran\u011b: 1","Hmotnost:1"]},"Price":1,"Type":"P","Weight":1},
+		{"AttackPower":1,"DefensePower":1,"Description":{"Name":"P\u011b\u0161\u00e1k","Symbol":"\ud83d\udc68","Text":["S\u00edla: 1","Hmotnost:1"]},"Price":1,"Type":"P","Weight":1},
 		{"AttackPower":0,"Capacity":200,"DefensePower":0,"Description":{"Name":"Lo\u010f","Symbol":"\u26f4","Text":["Nosnost: 200"]},"Price":100,"Type":"S","Weight":500},
 		{"AttackPower":6,"Capacity":0,"DefensePower":2,"Description":{"Name":"Slon","Symbol":"\ud83d\udc18","Text":["S\u00edla v \u00fatoku: 8","S\u00edla v obran\u011b: 2","Hmotnost: 10","Rychlost: 2 (m\u016f\u017ee j\u00edt p\u0159es hory)","Lze zkrotit jen v Kar\u00e1gu"]},"Price":6,"Speed":2,"Type":"E","Weight":10},
 		{"AttackPower":0,"Capacity":400,"DefensePower":0,"Description":{"Name":"F\u00e9nick\u00e1 lo\u010f","Symbol":"f\u26f4","Text":["Nosnost: 400","Rychlost: 2","Lze koupit jen v Kar\u00e1gu"]},"Price":100,"Speed":2,"Type":"O","Weight":500},

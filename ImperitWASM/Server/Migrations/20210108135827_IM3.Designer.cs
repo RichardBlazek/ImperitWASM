@@ -3,14 +3,16 @@ using System;
 using ImperitWASM.Server.Load;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace ImperitWASM.Server.Migrations
 {
     [DbContext(typeof(ImperitContext))]
-    partial class ImperitContextModelSnapshot : ModelSnapshot
+    [Migration("20210108135827_IM3")]
+    partial class IM3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -211,6 +213,12 @@ namespace ImperitWASM.Server.Migrations
                     b.Property<int>("Count")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("ManoeuvreId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("ProvinceId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("SoldiersId")
                         .HasColumnType("INTEGER");
 
@@ -219,6 +227,10 @@ namespace ImperitWASM.Server.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ManoeuvreId");
+
+                    b.HasIndex("ProvinceId");
 
                     b.HasIndex("SoldiersId");
 
@@ -408,13 +420,7 @@ namespace ImperitWASM.Server.Migrations
                     b.Property<int?>("ProvinceId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("SoldiersId")
-                        .HasColumnType("INTEGER");
-
                     b.HasIndex("ProvinceId");
-
-                    b.HasIndex("SoldiersId")
-                        .IsUnique();
 
                     b.HasDiscriminator().HasValue("Manoeuvre");
                 });
@@ -482,9 +488,7 @@ namespace ImperitWASM.Server.Migrations
                     b.HasBaseType("ImperitWASM.Shared.Data.SoldierType");
 
                     b.Property<int>("Capacity")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("Capacity");
+                        .HasColumnType("INTEGER");
 
                     b.HasDiscriminator().HasValue("Ship");
                 });
@@ -494,26 +498,18 @@ namespace ImperitWASM.Server.Migrations
                     b.HasBaseType("ImperitWASM.Shared.Data.Pedestrian");
 
                     b.Property<int>("Capacity")
-                        .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("INTEGER")
-                        .HasColumnName("Capacity");
+                        .HasColumnName("Elephant_Capacity");
 
                     b.Property<int>("Speed")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("Speed");
+                        .HasColumnType("INTEGER");
 
                     b.HasDiscriminator().HasValue("Elephant");
                 });
 
             modelBuilder.Entity("ImperitWASM.Shared.Data.OutlandishShip", b =>
                 {
-                    b.HasBaseType("ImperitWASM.Shared.Data.Ship");
-
-                    b.Property<int>("Speed")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("Speed");
+                    b.HasBaseType("ImperitWASM.Shared.Data.Elephant");
 
                     b.HasDiscriminator().HasValue("OutlandishShip");
                 });
@@ -634,6 +630,14 @@ namespace ImperitWASM.Server.Migrations
 
             modelBuilder.Entity("ImperitWASM.Shared.Data.Regiment", b =>
                 {
+                    b.HasOne("ImperitWASM.Shared.Data.Manoeuvre", null)
+                        .WithMany("Soldiers")
+                        .HasForeignKey("ManoeuvreId");
+
+                    b.HasOne("ImperitWASM.Shared.Data.Province", null)
+                        .WithMany("DefaultSoldiers")
+                        .HasForeignKey("ProvinceId");
+
                     b.HasOne("ImperitWASM.Shared.Data.Soldiers", null)
                         .WithMany("Regiments")
                         .HasForeignKey("SoldiersId")
@@ -806,15 +810,7 @@ namespace ImperitWASM.Server.Migrations
                         .WithMany()
                         .HasForeignKey("ProvinceId");
 
-                    b.HasOne("ImperitWASM.Shared.Data.Soldiers", "Soldiers")
-                        .WithOne()
-                        .HasForeignKey("ImperitWASM.Shared.Data.Manoeuvre", "SoldiersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Province");
-
-                    b.Navigation("Soldiers");
                 });
 
             modelBuilder.Entity("ImperitWASM.Shared.Data.Player", b =>
@@ -822,6 +818,11 @@ namespace ImperitWASM.Server.Migrations
                     b.Navigation("ActionList");
 
                     b.Navigation("Actions");
+                });
+
+            modelBuilder.Entity("ImperitWASM.Shared.Data.Province", b =>
+                {
+                    b.Navigation("DefaultSoldiers");
                 });
 
             modelBuilder.Entity("ImperitWASM.Shared.Data.Region", b =>
@@ -844,6 +845,11 @@ namespace ImperitWASM.Server.Migrations
             modelBuilder.Entity("ImperitWASM.Shared.Data.Soldiers", b =>
                 {
                     b.Navigation("Regiments");
+                });
+
+            modelBuilder.Entity("ImperitWASM.Shared.Data.Manoeuvre", b =>
+                {
+                    b.Navigation("Soldiers");
                 });
 #pragma warning restore 612, 618
         }

@@ -9,7 +9,9 @@ namespace ImperitWASM.Shared.Data
 	{
 		public int Id { get; private set; }
 		public string Name { get; private set; }
+		public int ShapeId { get; private set; }
 		public Shape Shape { get; private set; }
+		public int SoldiersId { get; private set; }
 		public Soldiers Soldiers { get; private set; }
 		public ICollection<RegionSoldierType>? RegionSoldierTypes { get; private set; }
 		public Settings Settings { get; private set; }
