@@ -8,6 +8,7 @@ namespace ImperitWASM.Shared.Data
 {
 	public record Settings
 	{
+		public int Id { get; private set; }
 		public int CountdownSeconds { get; private set; }
 		public int IntegerDefaultInstability { get; private set; }
 		public int DebtLimit { get; private set; }

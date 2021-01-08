@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ImperitWASM.Server.Migrations
 {
     [DbContext(typeof(ImperitContext))]
-    [Migration("20210108084318_TypeUnity")]
-    partial class TypeUnity
+    [Migration("20210108115649_IM")]
+    partial class IM
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -106,14 +106,14 @@ namespace ImperitWASM.Server.Migrations
                     b.Property<int>("Order")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("SettingsCountdownSeconds")
+                    b.Property<int>("SettingsId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Name");
 
                     b.HasIndex("GameId");
 
-                    b.HasIndex("SettingsCountdownSeconds");
+                    b.HasIndex("SettingsId");
 
                     b.ToTable("Players");
 
@@ -126,15 +126,6 @@ namespace ImperitWASM.Server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("ProvinceId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("RegionId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("ShapeId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int?>("ShapeId1")
                         .HasColumnType("INTEGER");
 
@@ -145,12 +136,6 @@ namespace ImperitWASM.Server.Migrations
                         .HasColumnType("REAL");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ProvinceId");
-
-                    b.HasIndex("RegionId");
-
-                    b.HasIndex("ShapeId");
 
                     b.HasIndex("ShapeId1");
 
@@ -192,7 +177,6 @@ namespace ImperitWASM.Server.Migrations
             modelBuilder.Entity("ImperitWASM.Shared.Data.Province", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("GameId")
@@ -204,7 +188,7 @@ namespace ImperitWASM.Server.Migrations
                     b.Property<int>("RegionId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("SettingsCountdownSeconds")
+                    b.Property<int>("SettingsId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -215,7 +199,7 @@ namespace ImperitWASM.Server.Migrations
 
                     b.HasIndex("RegionId");
 
-                    b.HasIndex("SettingsCountdownSeconds");
+                    b.HasIndex("SettingsId");
 
                     b.ToTable("Provinces");
                 });
@@ -258,7 +242,6 @@ namespace ImperitWASM.Server.Migrations
             modelBuilder.Entity("ImperitWASM.Shared.Data.Region", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Discriminator")
@@ -269,27 +252,18 @@ namespace ImperitWASM.Server.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("SettingsCountdownSeconds")
+                    b.Property<int>("SettingsId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("SettingsCountdownSeconds1")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("SettingsCountdownSeconds2")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("ShapeId")
+                    b.Property<int>("ShapeId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SettingsCountdownSeconds");
+                    b.HasIndex("SettingsId");
 
-                    b.HasIndex("SettingsCountdownSeconds1");
-
-                    b.HasIndex("SettingsCountdownSeconds2");
-
-                    b.HasIndex("ShapeId");
+                    b.HasIndex("ShapeId")
+                        .IsUnique();
 
                     b.ToTable("Region");
 
@@ -320,6 +294,10 @@ namespace ImperitWASM.Server.Migrations
 
             modelBuilder.Entity("ImperitWASM.Shared.Data.Settings", b =>
                 {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("CountdownSeconds")
                         .HasColumnType("INTEGER");
 
@@ -344,7 +322,7 @@ namespace ImperitWASM.Server.Migrations
                     b.Property<int>("PlayerCount")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("CountdownSeconds");
+                    b.HasKey("Id");
 
                     b.ToTable("Settings");
                 });
@@ -355,12 +333,13 @@ namespace ImperitWASM.Server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("CenterId")
+                    b.Property<int>("CenterId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CenterId");
+                    b.HasIndex("CenterId")
+                        .IsUnique();
 
                     b.ToTable("Shape");
                 });
@@ -387,10 +366,7 @@ namespace ImperitWASM.Server.Migrations
                     b.Property<int>("Price")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("SettingsCountdownSeconds")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("SettingsCountdownSeconds1")
+                    b.Property<int>("SettingsId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int?>("SoldiersId")
@@ -405,9 +381,7 @@ namespace ImperitWASM.Server.Migrations
 
                     b.HasKey("Symbol");
 
-                    b.HasIndex("SettingsCountdownSeconds");
-
-                    b.HasIndex("SettingsCountdownSeconds1");
+                    b.HasIndex("SettingsId");
 
                     b.HasIndex("SoldiersId");
 
@@ -419,15 +393,10 @@ namespace ImperitWASM.Server.Migrations
             modelBuilder.Entity("ImperitWASM.Shared.Data.Soldiers", b =>
                 {
                     b.Property<int>("Id")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("RegionId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("RegionId")
-                        .IsUnique();
 
                     b.ToTable("Soldiers");
                 });
@@ -531,18 +500,14 @@ namespace ImperitWASM.Server.Migrations
                         .HasColumnName("Elephant_Capacity");
 
                     b.Property<int>("Speed")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("Elephant_Speed");
+                        .HasColumnType("INTEGER");
 
                     b.HasDiscriminator().HasValue("Elephant");
                 });
 
             modelBuilder.Entity("ImperitWASM.Shared.Data.OutlandishShip", b =>
                 {
-                    b.HasBaseType("ImperitWASM.Shared.Data.Ship");
-
-                    b.Property<int>("Speed")
-                        .HasColumnType("INTEGER");
+                    b.HasBaseType("ImperitWASM.Shared.Data.Elephant");
 
                     b.HasDiscriminator().HasValue("OutlandishShip");
                 });
@@ -579,7 +544,7 @@ namespace ImperitWASM.Server.Migrations
 
                     b.HasOne("ImperitWASM.Shared.Data.Settings", "Settings")
                         .WithMany()
-                        .HasForeignKey("SettingsCountdownSeconds")
+                        .HasForeignKey("SettingsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -616,18 +581,6 @@ namespace ImperitWASM.Server.Migrations
 
             modelBuilder.Entity("ImperitWASM.Shared.Data.Point", b =>
                 {
-                    b.HasOne("ImperitWASM.Shared.Data.Province", null)
-                        .WithMany("Border")
-                        .HasForeignKey("ProvinceId");
-
-                    b.HasOne("ImperitWASM.Shared.Data.Region", null)
-                        .WithMany("Border")
-                        .HasForeignKey("RegionId");
-
-                    b.HasOne("ImperitWASM.Shared.Data.Shape", null)
-                        .WithMany("Border")
-                        .HasForeignKey("ShapeId");
-
                     b.HasOne("ImperitWASM.Shared.Data.Shape", null)
                         .WithMany("Points")
                         .HasForeignKey("ShapeId1");
@@ -638,6 +591,12 @@ namespace ImperitWASM.Server.Migrations
                     b.HasOne("ImperitWASM.Shared.Data.Game", null)
                         .WithMany()
                         .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ImperitWASM.Shared.Data.Soldiers", "Soldiers")
+                        .WithOne()
+                        .HasForeignKey("ImperitWASM.Shared.Data.Province", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -654,7 +613,7 @@ namespace ImperitWASM.Server.Migrations
 
                     b.HasOne("ImperitWASM.Shared.Data.Settings", "Settings")
                         .WithMany()
-                        .HasForeignKey("SettingsCountdownSeconds")
+                        .HasForeignKey("SettingsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -663,6 +622,8 @@ namespace ImperitWASM.Server.Migrations
                     b.Navigation("Region");
 
                     b.Navigation("Settings");
+
+                    b.Navigation("Soldiers");
                 });
 
             modelBuilder.Entity("ImperitWASM.Shared.Data.Regiment", b =>
@@ -692,35 +653,35 @@ namespace ImperitWASM.Server.Migrations
 
             modelBuilder.Entity("ImperitWASM.Shared.Data.Region", b =>
                 {
-                    b.HasOne("ImperitWASM.Shared.Data.Settings", null)
-                        .WithMany("RegionCollection")
-                        .HasForeignKey("SettingsCountdownSeconds")
+                    b.HasOne("ImperitWASM.Shared.Data.Soldiers", "Soldiers")
+                        .WithOne()
+                        .HasForeignKey("ImperitWASM.Shared.Data.Region", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("ImperitWASM.Shared.Data.Settings", "Settings")
-                        .WithMany()
-                        .HasForeignKey("SettingsCountdownSeconds1")
+                        .WithMany("RegionCollection")
+                        .HasForeignKey("SettingsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ImperitWASM.Shared.Data.Settings", null)
-                        .WithMany("Regions")
-                        .HasForeignKey("SettingsCountdownSeconds2");
-
                     b.HasOne("ImperitWASM.Shared.Data.Shape", "Shape")
-                        .WithMany()
-                        .HasForeignKey("ShapeId");
+                        .WithOne()
+                        .HasForeignKey("ImperitWASM.Shared.Data.Region", "ShapeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Settings");
 
                     b.Navigation("Shape");
+
+                    b.Navigation("Soldiers");
                 });
 
             modelBuilder.Entity("ImperitWASM.Shared.Data.RegionSoldierType", b =>
                 {
                     b.HasOne("ImperitWASM.Shared.Data.Region", null)
-                        .WithMany("ProvinceSoldierTypes")
+                        .WithMany("RegionSoldierTypes")
                         .HasForeignKey("RegionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -738,7 +699,7 @@ namespace ImperitWASM.Server.Migrations
                 {
                     b.OwnsOne("ImperitWASM.Shared.Value.Color", "LandColor", b1 =>
                         {
-                            b1.Property<int>("SettingsCountdownSeconds")
+                            b1.Property<int>("SettingsId")
                                 .HasColumnType("INTEGER");
 
                             b1.Property<byte>("A")
@@ -753,17 +714,17 @@ namespace ImperitWASM.Server.Migrations
                             b1.Property<byte>("R")
                                 .HasColumnType("INTEGER");
 
-                            b1.HasKey("SettingsCountdownSeconds");
+                            b1.HasKey("SettingsId");
 
                             b1.ToTable("Settings");
 
                             b1.WithOwner()
-                                .HasForeignKey("SettingsCountdownSeconds");
+                                .HasForeignKey("SettingsId");
                         });
 
                     b.OwnsOne("ImperitWASM.Shared.Value.Color", "MountainsColor", b1 =>
                         {
-                            b1.Property<int>("SettingsCountdownSeconds")
+                            b1.Property<int>("SettingsId")
                                 .HasColumnType("INTEGER");
 
                             b1.Property<byte>("A")
@@ -778,17 +739,17 @@ namespace ImperitWASM.Server.Migrations
                             b1.Property<byte>("R")
                                 .HasColumnType("INTEGER");
 
-                            b1.HasKey("SettingsCountdownSeconds");
+                            b1.HasKey("SettingsId");
 
                             b1.ToTable("Settings");
 
                             b1.WithOwner()
-                                .HasForeignKey("SettingsCountdownSeconds");
+                                .HasForeignKey("SettingsId");
                         });
 
                     b.OwnsOne("ImperitWASM.Shared.Value.Color", "SeaColor", b1 =>
                         {
-                            b1.Property<int>("SettingsCountdownSeconds")
+                            b1.Property<int>("SettingsId")
                                 .HasColumnType("INTEGER");
 
                             b1.Property<byte>("A")
@@ -803,12 +764,12 @@ namespace ImperitWASM.Server.Migrations
                             b1.Property<byte>("R")
                                 .HasColumnType("INTEGER");
 
-                            b1.HasKey("SettingsCountdownSeconds");
+                            b1.HasKey("SettingsId");
 
                             b1.ToTable("Settings");
 
                             b1.WithOwner()
-                                .HasForeignKey("SettingsCountdownSeconds");
+                                .HasForeignKey("SettingsId");
                         });
 
                     b.Navigation("LandColor")
@@ -824,8 +785,10 @@ namespace ImperitWASM.Server.Migrations
             modelBuilder.Entity("ImperitWASM.Shared.Data.Shape", b =>
                 {
                     b.HasOne("ImperitWASM.Shared.Data.Point", "Center")
-                        .WithMany()
-                        .HasForeignKey("CenterId");
+                        .WithOne()
+                        .HasForeignKey("ImperitWASM.Shared.Data.Shape", "CenterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Center");
                 });
@@ -834,32 +797,13 @@ namespace ImperitWASM.Server.Migrations
                 {
                     b.HasOne("ImperitWASM.Shared.Data.Settings", null)
                         .WithMany("SoldierTypeCollection")
-                        .HasForeignKey("SettingsCountdownSeconds");
-
-                    b.HasOne("ImperitWASM.Shared.Data.Settings", null)
-                        .WithMany("SoldierTypes")
-                        .HasForeignKey("SettingsCountdownSeconds1")
+                        .HasForeignKey("SettingsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("ImperitWASM.Shared.Data.Soldiers", null)
                         .WithMany("Types")
                         .HasForeignKey("SoldiersId");
-                });
-
-            modelBuilder.Entity("ImperitWASM.Shared.Data.Soldiers", b =>
-                {
-                    b.HasOne("ImperitWASM.Shared.Data.Province", null)
-                        .WithOne("Soldiers")
-                        .HasForeignKey("ImperitWASM.Shared.Data.Soldiers", "Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ImperitWASM.Shared.Data.Region", null)
-                        .WithOne("Soldiers")
-                        .HasForeignKey("ImperitWASM.Shared.Data.Soldiers", "RegionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("ImperitWASM.Shared.Data.Manoeuvre", b =>
@@ -880,39 +824,23 @@ namespace ImperitWASM.Server.Migrations
 
             modelBuilder.Entity("ImperitWASM.Shared.Data.Province", b =>
                 {
-                    b.Navigation("Border");
-
                     b.Navigation("DefaultSoldiers");
-
-                    b.Navigation("Soldiers")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("ImperitWASM.Shared.Data.Region", b =>
                 {
-                    b.Navigation("Border");
-
-                    b.Navigation("ProvinceSoldierTypes");
-
-                    b.Navigation("Soldiers")
-                        .IsRequired();
+                    b.Navigation("RegionSoldierTypes");
                 });
 
             modelBuilder.Entity("ImperitWASM.Shared.Data.Settings", b =>
                 {
                     b.Navigation("RegionCollection");
 
-                    b.Navigation("Regions");
-
                     b.Navigation("SoldierTypeCollection");
-
-                    b.Navigation("SoldierTypes");
                 });
 
             modelBuilder.Entity("ImperitWASM.Shared.Data.Shape", b =>
                 {
-                    b.Navigation("Border");
-
                     b.Navigation("Points");
                 });
 

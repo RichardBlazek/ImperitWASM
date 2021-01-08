@@ -24,21 +24,22 @@ namespace ImperitWASM.Server.Load
 				_ = settings.OwnsOne(s => s.LandColor);
 				_ = settings.OwnsOne(s => s.MountainsColor);
 				_ = settings.OwnsOne(s => s.SeaColor);
-				_ = settings.HasMany(s => s.RegionCollection).WithOne().Required();
-				_ = settings.HasMany(s => s.SoldierTypes).WithOne().Required();
-				_ = settings.HasCustomKey(s => s.CountdownSeconds);
+				_ = settings.Ignore(s => s.Regions).HasMany(s => s.RegionCollection).WithOne(r => r.Settings).Required();
+				_ = settings.Ignore(s => s.SoldierTypes).HasMany(s => s.SoldierTypeCollection).WithOne().Required();
 			}).Entity<Province>(province =>
 			{
 				_ = province.HasOne(p => p.Player).WithMany().Cascade();
 				_ = province.HasOne(p => p.Settings).WithMany().Required();
-				_ = province.HasOne(p => p.Soldiers).WithOne().HasPrincipalKey<Province>(p => p.Id).Required();
+				_ = province.HasOne(p => p.Soldiers).WithOne().HasPrincipalKey<Soldiers>(p => p.Id).Required();
 				_ = province.HasOne(p => p.Region).WithMany().HasForeignKey(p => p.RegionId).Required();
 				_ = province.HasOne<Game>().WithMany().HasForeignKey(p => p.GameId).Required();
+				_ = province.Ignore(p => p.Center).Ignore(p => p.Border);
 			}).Entity<Region>(region =>
 			{
-				_ = region.HasOne(r => r.Settings).WithMany().Required();
-				_ = region.HasOne(r => r.Soldiers).WithOne().HasPrincipalKey<Region>(r => r.Id).Required();
-				_ = region.HasMany(r => r.ProvinceSoldierTypes).WithOne().Required();
+				_ = region.HasOne(r => r.Soldiers).WithOne().HasPrincipalKey<Soldiers>(r => r.Id).Required();
+				_ = region.HasMany(r => r.RegionSoldierTypes).WithOne().Required();
+				_ = region.HasOne(r => r.Shape).WithOne().HasPrincipalKey<Shape>(r => r.Id).Required();
+				_ = region.Ignore(r => r.Center).Ignore(r => r.Border);
 			}).Entity<Player>(player =>
 			{
 				_ = player.OwnsOne(p => p.Color);
@@ -50,7 +51,8 @@ namespace ImperitWASM.Server.Load
 			{
 				_ = session.HasOne<Player>().WithMany().HasForeignKey(s => s.P).Required();
 				_ = session.HasCustomKey(s => s.Key);
-			}).Entity<SoldierType>(type => type.HasCustomKey(t => t.Symbol))
+			}).Entity<Shape>(shape => shape.Ignore(s => s.Border).HasOne(s => s.Center).WithOne().HasForeignKey<Shape>(s => s.CenterId).Required())
+			  .Entity<SoldierType>(type => type.HasCustomKey(t => t.Symbol))
 			  .Entity<RegionSoldierType>(recruitable => recruitable.HasOne(r => r.SoldierType).WithMany().Required())
 			  .Entity<Soldiers>(soldiers => soldiers.HasMany(s => s.Regiments).WithOne().Required())
 			  .Entity<Regiment>(regiment => regiment.HasOne(r => r.Type).WithMany().Required())

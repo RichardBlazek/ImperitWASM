@@ -9,10 +9,10 @@ namespace ImperitWASM.Shared.Data
 	{
 		public int Id { get; private set; }
 		public string Name { get; private set; }
-		public virtual Shape Shape { get; private set; }
-		public virtual Soldiers Soldiers { get; private set; }
-		public virtual ICollection<RegionSoldierType>? ProvinceSoldierTypes { get; private set; }
-		public virtual Settings Settings { get; private set; }
+		public Shape Shape { get; private set; }
+		public Soldiers Soldiers { get; private set; }
+		public ICollection<RegionSoldierType>? RegionSoldierTypes { get; private set; }
+		public Settings Settings { get; private set; }
 		public Region(string name, Shape shape, Soldiers soldiers, Settings settings)
 		{
 			Name = name;
@@ -26,7 +26,7 @@ namespace ImperitWASM.Shared.Data
 		public int Power => Soldiers.Power;
 		public ImmutableArray<Point> Border => Shape.Border;
 		public Point Center => Shape.Center;
-		public bool IsRecruitable(SoldierType type) => ProvinceSoldierTypes!.Any(t => t.SoldierType == type);
+		public bool IsRecruitable(SoldierType type) => RegionSoldierTypes!.Any(t => t.SoldierType == type);
 		public bool IsShaky(Soldiers present) => Instability(present).RandomBool;
 
 		public virtual bool Inhabitable => false;

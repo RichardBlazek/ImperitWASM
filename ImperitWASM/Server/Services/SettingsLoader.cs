@@ -17,7 +17,7 @@ namespace ImperitWASM.Server.Services
 			.Include(settings => settings.RegionCollection).ThenInclude(region => region.Settings)
 			.Include(settings => settings.RegionCollection).ThenInclude(region => region.Shape).ThenInclude(shape => shape.Center)
 			.Include(settings => settings.RegionCollection).ThenInclude(region => region.Shape).ThenInclude(shape => shape.Border)
-			.Include(settings => settings.RegionCollection).ThenInclude(region => region.ProvinceSoldierTypes).ThenInclude(pst => pst.SoldierType)
+			.Include(settings => settings.RegionCollection).ThenInclude(region => region.RegionSoldierTypes).ThenInclude(pst => pst.SoldierType)
 			.Include(settings => settings.RegionCollection).ThenInclude(region => region.Soldiers).ThenInclude(soldiers => soldiers.Regiments).ThenInclude(regiment => regiment.Type).Single();
 	}
 }

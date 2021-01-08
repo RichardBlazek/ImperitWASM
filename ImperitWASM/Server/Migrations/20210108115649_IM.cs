@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace ImperitWASM.Server.Migrations
 {
-    public partial class TypeUnity : Migration
+    public partial class IM : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -17,7 +17,10 @@ namespace ImperitWASM.Server.Migrations
                     StartTime = table.Column<DateTime>(type: "TEXT", nullable: false),
                     FinishTime = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
-                constraints: table => table.PrimaryKey("PK_Games", x => x.Id));
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Games", x => x.Id);
+                });
 
             migrationBuilder.CreateTable(
                 name: "Powers",
@@ -33,12 +36,17 @@ namespace ImperitWASM.Server.Migrations
                     Money = table.Column<int>(type: "INTEGER", nullable: false),
                     Soldiers = table.Column<int>(type: "INTEGER", nullable: false)
                 },
-                constraints: table => table.PrimaryKey("PK_Powers", x => x.Id));
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Powers", x => x.Id);
+                });
 
             migrationBuilder.CreateTable(
                 name: "Settings",
                 columns: table => new
                 {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
                     CountdownSeconds = table.Column<int>(type: "INTEGER", nullable: false),
                     IntegerDefaultInstability = table.Column<int>(type: "INTEGER", nullable: false),
                     DebtLimit = table.Column<int>(type: "INTEGER", nullable: false),
@@ -60,7 +68,22 @@ namespace ImperitWASM.Server.Migrations
                     DefaultMoney = table.Column<int>(type: "INTEGER", nullable: false),
                     PlayerCount = table.Column<int>(type: "INTEGER", nullable: false)
                 },
-                constraints: table => table.PrimaryKey("PK_Settings", x => x.CountdownSeconds));
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Settings", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Soldiers",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Soldiers", x => x.Id);
+                });
 
             migrationBuilder.CreateTable(
                 name: "Players",
@@ -75,7 +98,7 @@ namespace ImperitWASM.Server.Migrations
                     Color_A = table.Column<byte>(type: "INTEGER", nullable: false),
                     Money = table.Column<int>(type: "INTEGER", nullable: false),
                     Alive = table.Column<bool>(type: "INTEGER", nullable: false),
-                    SettingsCountdownSeconds = table.Column<int>(type: "INTEGER", nullable: false),
+                    SettingsId = table.Column<int>(type: "INTEGER", nullable: false),
                     IsActive = table.Column<bool>(type: "INTEGER", nullable: false),
                     Discriminator = table.Column<string>(type: "TEXT", nullable: false),
                     StringPassword = table.Column<string>(type: "TEXT", nullable: true)
@@ -90,11 +113,46 @@ namespace ImperitWASM.Server.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Players_Settings_SettingsCountdownSeconds",
-                        column: x => x.SettingsCountdownSeconds,
+                        name: "FK_Players_Settings_SettingsId",
+                        column: x => x.SettingsId,
                         principalTable: "Settings",
-                        principalColumn: "CountdownSeconds",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SoldierType",
+                columns: table => new
+                {
+                    Symbol = table.Column<string>(type: "TEXT", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Text = table.Column<string>(type: "TEXT", nullable: false),
+                    AttackPower = table.Column<int>(type: "INTEGER", nullable: false),
+                    DefensePower = table.Column<int>(type: "INTEGER", nullable: false),
+                    Weight = table.Column<int>(type: "INTEGER", nullable: false),
+                    Price = table.Column<int>(type: "INTEGER", nullable: false),
+                    Discriminator = table.Column<string>(type: "TEXT", nullable: false),
+                    SettingsId = table.Column<int>(type: "INTEGER", nullable: false),
+                    SoldiersId = table.Column<int>(type: "INTEGER", nullable: true),
+                    Elephant_Capacity = table.Column<int>(type: "INTEGER", nullable: true),
+                    Speed = table.Column<int>(type: "INTEGER", nullable: true),
+                    Capacity = table.Column<int>(type: "INTEGER", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SoldierType", x => x.Symbol);
+                    table.ForeignKey(
+                        name: "FK_SoldierType_Settings_SettingsId",
+                        column: x => x.SettingsId,
+                        principalTable: "Settings",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_SoldierType_Soldiers_SoldiersId",
+                        column: x => x.SoldiersId,
+                        principalTable: "Soldiers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -127,18 +185,32 @@ namespace ImperitWASM.Server.Migrations
                     ProvinceId = table.Column<int>(type: "INTEGER", nullable: true),
                     SoldiersId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
-                constraints: table => table.PrimaryKey("PK_Regiment", x => x.Id));
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Regiment", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Regiment_Soldiers_SoldiersId",
+                        column: x => x.SoldiersId,
+                        principalTable: "Soldiers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Regiment_SoldierType_TypeSymbol",
+                        column: x => x.TypeSymbol,
+                        principalTable: "SoldierType",
+                        principalColumn: "Symbol",
+                        onDelete: ReferentialAction.Cascade);
+                });
 
             migrationBuilder.CreateTable(
                 name: "Provinces",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false),
                     GameId = table.Column<int>(type: "INTEGER", nullable: false),
                     RegionId = table.Column<int>(type: "INTEGER", nullable: false),
                     PlayerName = table.Column<string>(type: "TEXT", nullable: true),
-                    SettingsCountdownSeconds = table.Column<int>(type: "INTEGER", nullable: false)
+                    SettingsId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -156,10 +228,16 @@ namespace ImperitWASM.Server.Migrations
                         principalColumn: "Name",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Provinces_Settings_SettingsCountdownSeconds",
-                        column: x => x.SettingsCountdownSeconds,
+                        name: "FK_Provinces_Settings_SettingsId",
+                        column: x => x.SettingsId,
                         principalTable: "Settings",
-                        principalColumn: "CountdownSeconds",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Provinces_Soldiers_Id",
+                        column: x => x.Id,
+                        principalTable: "Soldiers",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -204,54 +282,11 @@ namespace ImperitWASM.Server.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    CenterId = table.Column<int>(type: "INTEGER", nullable: true)
-                },
-                constraints: table => table.PrimaryKey("PK_Shape", x => x.Id));
-
-            migrationBuilder.CreateTable(
-                name: "Region",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", nullable: false),
-                    ShapeId = table.Column<int>(type: "INTEGER", nullable: true),
-                    SettingsCountdownSeconds1 = table.Column<int>(type: "INTEGER", nullable: false),
-                    Discriminator = table.Column<string>(type: "TEXT", nullable: false),
-                    SettingsCountdownSeconds = table.Column<int>(type: "INTEGER", nullable: false),
-                    SettingsCountdownSeconds2 = table.Column<int>(type: "INTEGER", nullable: true),
-                    Earnings = table.Column<int>(type: "INTEGER", nullable: true),
-                    IsStart = table.Column<bool>(type: "INTEGER", nullable: true),
-                    IsFinal = table.Column<bool>(type: "INTEGER", nullable: true),
-                    HasPort = table.Column<bool>(type: "INTEGER", nullable: true)
+                    CenterId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Region", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Region_Settings_SettingsCountdownSeconds",
-                        column: x => x.SettingsCountdownSeconds,
-                        principalTable: "Settings",
-                        principalColumn: "CountdownSeconds",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Region_Settings_SettingsCountdownSeconds1",
-                        column: x => x.SettingsCountdownSeconds1,
-                        principalTable: "Settings",
-                        principalColumn: "CountdownSeconds",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Region_Settings_SettingsCountdownSeconds2",
-                        column: x => x.SettingsCountdownSeconds2,
-                        principalTable: "Settings",
-                        principalColumn: "CountdownSeconds",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Region_Shape_ShapeId",
-                        column: x => x.ShapeId,
-                        principalTable: "Shape",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                    table.PrimaryKey("PK_Shape", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -262,32 +297,11 @@ namespace ImperitWASM.Server.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     X = table.Column<double>(type: "REAL", nullable: false),
                     Y = table.Column<double>(type: "REAL", nullable: false),
-                    ProvinceId = table.Column<int>(type: "INTEGER", nullable: true),
-                    RegionId = table.Column<int>(type: "INTEGER", nullable: true),
-                    ShapeId = table.Column<int>(type: "INTEGER", nullable: true),
                     ShapeId1 = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Point", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Point_Provinces_ProvinceId",
-                        column: x => x.ProvinceId,
-                        principalTable: "Provinces",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Point_Region_RegionId",
-                        column: x => x.RegionId,
-                        principalTable: "Region",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Point_Shape_ShapeId",
-                        column: x => x.ShapeId,
-                        principalTable: "Shape",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Point_Shape_ShapeId1",
                         column: x => x.ShapeId1,
@@ -297,70 +311,40 @@ namespace ImperitWASM.Server.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Soldiers",
+                name: "Region",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false),
-                    RegionId = table.Column<int>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Soldiers", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Soldiers_Provinces_Id",
-                        column: x => x.Id,
-                        principalTable: "Provinces",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Soldiers_Region_RegionId",
-                        column: x => x.RegionId,
-                        principalTable: "Region",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "SoldierType",
-                columns: table => new
-                {
-                    Symbol = table.Column<string>(type: "TEXT", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
-                    Text = table.Column<string>(type: "TEXT", nullable: false),
-                    AttackPower = table.Column<int>(type: "INTEGER", nullable: false),
-                    DefensePower = table.Column<int>(type: "INTEGER", nullable: false),
-                    Weight = table.Column<int>(type: "INTEGER", nullable: false),
-                    Price = table.Column<int>(type: "INTEGER", nullable: false),
+                    ShapeId = table.Column<int>(type: "INTEGER", nullable: false),
+                    SettingsId = table.Column<int>(type: "INTEGER", nullable: false),
                     Discriminator = table.Column<string>(type: "TEXT", nullable: false),
-                    SettingsCountdownSeconds = table.Column<int>(type: "INTEGER", nullable: true),
-                    SettingsCountdownSeconds1 = table.Column<int>(type: "INTEGER", nullable: false),
-                    SoldiersId = table.Column<int>(type: "INTEGER", nullable: true),
-                    Elephant_Capacity = table.Column<int>(type: "INTEGER", nullable: true),
-                    Elephant_Speed = table.Column<int>(type: "INTEGER", nullable: true),
-                    Capacity = table.Column<int>(type: "INTEGER", nullable: true),
-                    Speed = table.Column<int>(type: "INTEGER", nullable: true)
+                    Earnings = table.Column<int>(type: "INTEGER", nullable: true),
+                    IsStart = table.Column<bool>(type: "INTEGER", nullable: true),
+                    IsFinal = table.Column<bool>(type: "INTEGER", nullable: true),
+                    HasPort = table.Column<bool>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SoldierType", x => x.Symbol);
+                    table.PrimaryKey("PK_Region", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_SoldierType_Settings_SettingsCountdownSeconds",
-                        column: x => x.SettingsCountdownSeconds,
+                        name: "FK_Region_Settings_SettingsId",
+                        column: x => x.SettingsId,
                         principalTable: "Settings",
-                        principalColumn: "CountdownSeconds",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_SoldierType_Settings_SettingsCountdownSeconds1",
-                        column: x => x.SettingsCountdownSeconds1,
-                        principalTable: "Settings",
-                        principalColumn: "CountdownSeconds",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_SoldierType_Soldiers_SoldiersId",
-                        column: x => x.SoldiersId,
+                        name: "FK_Region_Shape_ShapeId",
+                        column: x => x.ShapeId,
+                        principalTable: "Shape",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Region_Soldiers_Id",
+                        column: x => x.Id,
                         principalTable: "Soldiers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -410,24 +394,9 @@ namespace ImperitWASM.Server.Migrations
                 column: "GameId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Players_SettingsCountdownSeconds",
+                name: "IX_Players_SettingsId",
                 table: "Players",
-                column: "SettingsCountdownSeconds");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Point_ProvinceId",
-                table: "Point",
-                column: "ProvinceId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Point_RegionId",
-                table: "Point",
-                column: "RegionId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Point_ShapeId",
-                table: "Point",
-                column: "ShapeId");
+                column: "SettingsId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Point_ShapeId1",
@@ -450,9 +419,9 @@ namespace ImperitWASM.Server.Migrations
                 column: "RegionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Provinces_SettingsCountdownSeconds",
+                name: "IX_Provinces_SettingsId",
                 table: "Provinces",
-                column: "SettingsCountdownSeconds");
+                column: "SettingsId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Regiment_ManoeuvreId",
@@ -475,24 +444,15 @@ namespace ImperitWASM.Server.Migrations
                 column: "TypeSymbol");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Region_SettingsCountdownSeconds",
+                name: "IX_Region_SettingsId",
                 table: "Region",
-                column: "SettingsCountdownSeconds");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Region_SettingsCountdownSeconds1",
-                table: "Region",
-                column: "SettingsCountdownSeconds1");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Region_SettingsCountdownSeconds2",
-                table: "Region",
-                column: "SettingsCountdownSeconds2");
+                column: "SettingsId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Region_ShapeId",
                 table: "Region",
-                column: "ShapeId");
+                column: "ShapeId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_RegionSoldierType_RegionId",
@@ -512,23 +472,13 @@ namespace ImperitWASM.Server.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Shape_CenterId",
                 table: "Shape",
-                column: "CenterId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Soldiers_RegionId",
-                table: "Soldiers",
-                column: "RegionId",
+                column: "CenterId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_SoldierType_SettingsCountdownSeconds",
+                name: "IX_SoldierType_SettingsId",
                 table: "SoldierType",
-                column: "SettingsCountdownSeconds");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_SoldierType_SettingsCountdownSeconds1",
-                table: "SoldierType",
-                column: "SettingsCountdownSeconds1");
+                column: "SettingsId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SoldierType_SoldiersId",
@@ -552,22 +502,6 @@ namespace ImperitWASM.Server.Migrations
                 onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Regiment_Soldiers_SoldiersId",
-                table: "Regiment",
-                column: "SoldiersId",
-                principalTable: "Soldiers",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Regiment_SoldierType_TypeSymbol",
-                table: "Regiment",
-                column: "TypeSymbol",
-                principalTable: "SoldierType",
-                principalColumn: "Symbol",
-                onDelete: ReferentialAction.Cascade);
-
-            migrationBuilder.AddForeignKey(
                 name: "FK_Provinces_Region_RegionId",
                 table: "Provinces",
                 column: "RegionId",
@@ -581,39 +515,11 @@ namespace ImperitWASM.Server.Migrations
                 column: "CenterId",
                 principalTable: "Point",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
+                onDelete: ReferentialAction.Cascade);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Provinces_Players_PlayerName",
-                table: "Provinces");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Point_Provinces_ProvinceId",
-                table: "Point");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Region_Settings_SettingsCountdownSeconds",
-                table: "Region");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Region_Settings_SettingsCountdownSeconds1",
-                table: "Region");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Region_Settings_SettingsCountdownSeconds2",
-                table: "Region");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Point_Region_RegionId",
-                table: "Point");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Point_Shape_ShapeId",
-                table: "Point");
-
             migrationBuilder.DropForeignKey(
                 name: "FK_Point_Shape_ShapeId1",
                 table: "Point");
@@ -637,13 +543,13 @@ namespace ImperitWASM.Server.Migrations
                 name: "SoldierType");
 
             migrationBuilder.DropTable(
-                name: "Soldiers");
+                name: "Provinces");
 
             migrationBuilder.DropTable(
                 name: "Players");
 
             migrationBuilder.DropTable(
-                name: "Provinces");
+                name: "Region");
 
             migrationBuilder.DropTable(
                 name: "Games");
@@ -652,7 +558,7 @@ namespace ImperitWASM.Server.Migrations
                 name: "Settings");
 
             migrationBuilder.DropTable(
-                name: "Region");
+                name: "Soldiers");
 
             migrationBuilder.DropTable(
                 name: "Shape");
