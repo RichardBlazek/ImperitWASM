@@ -25,7 +25,7 @@ namespace ImperitWASM.Server.Controllers
 		{
 			View.Recruit => settings.RecruitableIn(to).Any(),
 			View.Move => provinces[from].CanAnyMove(provinces, provinces[to]),
-			View.Purchase => provinces[to].Walkable && new Buy(provinces[to]).Allowed(player, provinces),
+			View.Purchase => provinces[to].Mainland && new Buy(provinces[to]).Allowed(player, provinces),
 			_ => false
 		};
 		Switch IfPossible(Provinces provinces, Player player, Switch s) => IsPossible(provinces, player, s) ? s : new Switch(s.Select, View.Map, null, null);
@@ -33,7 +33,7 @@ namespace ImperitWASM.Server.Controllers
 		{
 			int start => new Switch(null, start == c.Clicked ? View.Recruit : View.Move, start, c.Clicked),
 			_ when provinces[c.Clicked].IsAllyOf(player) => new Switch(c.Clicked, View.Map, null, null),
-			_ when provinces[c.Clicked] is { Walkable: true, Inhabited: false } => new Switch(null, View.Purchase, c.Clicked, c.Clicked),
+			_ when provinces[c.Clicked] is { Mainland: true, Inhabited: false } => new Switch(null, View.Purchase, c.Clicked, c.Clicked),
 			_ => new Switch(null, View.Map, null, null)
 		};
 		[HttpPost("Clicked")]

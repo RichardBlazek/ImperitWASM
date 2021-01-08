@@ -17,7 +17,7 @@ namespace ImperitWASM.Shared.Commands
 		}
 		static (IEnumerable<Player>, IEnumerable<Province>) Clear(Player actor, IEnumerable<Player> players, IEnumerable<Province> provinces)
 		{
-			var cleared_players = players.Select(altered => provinces.Any(province => province.IsAllyOf(altered) && (province.HasSoldiers || province.Walkable)) ? altered : altered.Die()).ToArray();
+			var cleared_players = players.Select(altered => provinces.Any(province => province.IsAllyOf(altered) && (province.HasSoldiers || province.Mainland)) ? altered : altered.Die()).ToArray();
 			var cleared_provinces = provinces.Select(altered => cleared_players.Any(player => player.Alive && altered.IsAllyOf(player)) ? altered.RevoltIfShaky(actor) : altered.Revolt());
 			return (cleared_players, cleared_provinces);
 		}

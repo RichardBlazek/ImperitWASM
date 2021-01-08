@@ -218,28 +218,6 @@ namespace ImperitWASM.Server.Migrations
                     b.ToTable("Provinces");
                 });
 
-            modelBuilder.Entity("ImperitWASM.Shared.Data.ProvinceSoldierType", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("RegionId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("SoldierTypeSymbol")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RegionId");
-
-                    b.HasIndex("SoldierTypeSymbol");
-
-                    b.ToTable("ProvinceSoldierType");
-                });
-
             modelBuilder.Entity("ImperitWASM.Shared.Data.Regiment", b =>
                 {
                     b.Property<int>("Id")
@@ -314,6 +292,28 @@ namespace ImperitWASM.Server.Migrations
                     b.ToTable("Region");
 
                     b.HasDiscriminator<string>("Discriminator").HasValue("Region");
+                });
+
+            modelBuilder.Entity("ImperitWASM.Shared.Data.RegionSoldierType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("RegionId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("SoldierTypeSymbol")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RegionId");
+
+                    b.HasIndex("SoldierTypeSymbol");
+
+                    b.ToTable("RegionSoldierType");
                 });
 
             modelBuilder.Entity("ImperitWASM.Shared.Data.Settings", b =>
@@ -663,23 +663,6 @@ namespace ImperitWASM.Server.Migrations
                     b.Navigation("Settings");
                 });
 
-            modelBuilder.Entity("ImperitWASM.Shared.Data.ProvinceSoldierType", b =>
-                {
-                    b.HasOne("ImperitWASM.Shared.Data.Region", null)
-                        .WithMany("ProvinceSoldierTypes")
-                        .HasForeignKey("RegionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ImperitWASM.Shared.Data.SoldierType", "SoldierType")
-                        .WithMany()
-                        .HasForeignKey("SoldierTypeSymbol")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("SoldierType");
-                });
-
             modelBuilder.Entity("ImperitWASM.Shared.Data.Regiment", b =>
                 {
                     b.HasOne("ImperitWASM.Shared.Data.Manoeuvre", null)
@@ -730,6 +713,23 @@ namespace ImperitWASM.Server.Migrations
                     b.Navigation("Settings");
 
                     b.Navigation("Shape");
+                });
+
+            modelBuilder.Entity("ImperitWASM.Shared.Data.RegionSoldierType", b =>
+                {
+                    b.HasOne("ImperitWASM.Shared.Data.Region", null)
+                        .WithMany("ProvinceSoldierTypes")
+                        .HasForeignKey("RegionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ImperitWASM.Shared.Data.SoldierType", "SoldierType")
+                        .WithMany()
+                        .HasForeignKey("SoldierTypeSymbol")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SoldierType");
                 });
 
             modelBuilder.Entity("ImperitWASM.Shared.Data.Settings", b =>

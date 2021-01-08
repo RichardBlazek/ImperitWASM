@@ -59,7 +59,7 @@ namespace ImperitWASM.Server.Controllers
 		{
 			var player = players[purchase.P]!;
 			var prov = provinces[player.GameId];
-			return prov[purchase.L].Walkable ? new PurchaseInfo(new Buy(prov[purchase.L]).Allowed(player, prov), prov[purchase.L].Name, prov[purchase.L].Price, player.Money) : new PurchaseInfo(false, "", 0, 0);
+			return prov[purchase.L].Mainland ? new PurchaseInfo(new Buy(prov[purchase.L]).Allowed(player, prov), prov[purchase.L].Name, prov[purchase.L].Price, player.Money) : new PurchaseInfo(false, "", 0, 0);
 		}
 		[HttpPost("Purchase")]
 		public async Task Purchase([FromBody] PurchaseCmd purchase)

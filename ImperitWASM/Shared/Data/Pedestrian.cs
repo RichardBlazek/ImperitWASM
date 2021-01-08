@@ -6,9 +6,9 @@
 			: base(name, symbol, text, attackPower, defensePower, weight, price) { }
 		public override int CanMove(Provinces provinces, Province from, Province to)
 		{
-			return from.Walkable && to.Walkable && provinces.Passable(from, to, 1, (a, b) => a.Walkable && b.Walkable ? 1 : 2) ? Weight : 0;
+			return from.Mainland && to.Mainland && provinces.Passable(from, to, 1, (a, b) => a.Mainland && b.Mainland ? 1 : 2) ? Weight : 0;
 		}
-		public override bool IsRecruitable(Region region) => region.Walkable;
-		public override int CanSustain(Province province) => province.Walkable ? Weight : 0;
+		public override bool IsRecruitable(Region region) => region.Mainland;
+		public override int CanSustain(Province province) => province.Mainland ? Weight : 0;
 	}
 }

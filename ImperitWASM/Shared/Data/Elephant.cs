@@ -9,9 +9,9 @@
 
 		public override int CanMove(Provinces provinces, Province from, Province to)
 		{
-			return from.Walkable && to.Walkable && provinces.Passable(from, to, Speed, (_, dest) => dest.Dry ? 1 : Speed + 1) ? Weight + Capacity : 0;
+			return from.Mainland && to.Mainland && provinces.Passable(from, to, Speed, (_, dest) => dest.Dry ? 1 : Speed + 1) ? Weight + Capacity : 0;
 		}
-		public override int CanSustain(Province province) => province.Walkable ? Capacity + Weight : 0;
+		public override int CanSustain(Province province) => province.Mainland ? Capacity + Weight : 0;
 		public override bool IsRecruitable(Region region) => region.IsRecruitable(this);
 	}
 }

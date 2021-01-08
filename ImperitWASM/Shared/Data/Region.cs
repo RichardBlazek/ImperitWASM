@@ -11,7 +11,7 @@ namespace ImperitWASM.Shared.Data
 		public string Name { get; private set; }
 		public virtual Shape Shape { get; private set; }
 		public virtual Soldiers Soldiers { get; private set; }
-		public virtual ICollection<ProvinceSoldierType>? ProvinceSoldierTypes { get; private set; }
+		public virtual ICollection<RegionSoldierType>? ProvinceSoldierTypes { get; private set; }
 		public virtual Settings Settings { get; private set; }
 		public Region(string name, Shape shape, Soldiers soldiers, Settings settings)
 		{
@@ -31,7 +31,7 @@ namespace ImperitWASM.Shared.Data
 
 		public virtual bool Inhabitable => false;
 		public virtual bool Sailable => false;
-		public virtual bool Walkable => false;
+		public virtual bool Mainland => false;
 		public virtual bool Dry => false;
 		public virtual bool Port => false;
 

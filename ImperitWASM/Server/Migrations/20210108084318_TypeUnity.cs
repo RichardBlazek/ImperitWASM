@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace ImperitWASM.Server.Migrations
 {
-    public partial class UnifiedTypes : Migration
+    public partial class TypeUnity : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -17,10 +17,7 @@ namespace ImperitWASM.Server.Migrations
                     StartTime = table.Column<DateTime>(type: "TEXT", nullable: false),
                     FinishTime = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Games", x => x.Id);
-                });
+                constraints: table => table.PrimaryKey("PK_Games", x => x.Id));
 
             migrationBuilder.CreateTable(
                 name: "Powers",
@@ -36,10 +33,7 @@ namespace ImperitWASM.Server.Migrations
                     Money = table.Column<int>(type: "INTEGER", nullable: false),
                     Soldiers = table.Column<int>(type: "INTEGER", nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Powers", x => x.Id);
-                });
+                constraints: table => table.PrimaryKey("PK_Powers", x => x.Id));
 
             migrationBuilder.CreateTable(
                 name: "Settings",
@@ -66,10 +60,7 @@ namespace ImperitWASM.Server.Migrations
                     DefaultMoney = table.Column<int>(type: "INTEGER", nullable: false),
                     PlayerCount = table.Column<int>(type: "INTEGER", nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Settings", x => x.CountdownSeconds);
-                });
+                constraints: table => table.PrimaryKey("PK_Settings", x => x.CountdownSeconds));
 
             migrationBuilder.CreateTable(
                 name: "Players",
@@ -136,10 +127,7 @@ namespace ImperitWASM.Server.Migrations
                     ProvinceId = table.Column<int>(type: "INTEGER", nullable: true),
                     SoldiersId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Regiment", x => x.Id);
-                });
+                constraints: table => table.PrimaryKey("PK_Regiment", x => x.Id));
 
             migrationBuilder.CreateTable(
                 name: "Provinces",
@@ -218,10 +206,7 @@ namespace ImperitWASM.Server.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     CenterId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Shape", x => x.Id);
-                });
+                constraints: table => table.PrimaryKey("PK_Shape", x => x.Id));
 
             migrationBuilder.CreateTable(
                 name: "Region",
@@ -379,7 +364,7 @@ namespace ImperitWASM.Server.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ProvinceSoldierType",
+                name: "RegionSoldierType",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
@@ -389,15 +374,15 @@ namespace ImperitWASM.Server.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProvinceSoldierType", x => x.Id);
+                    table.PrimaryKey("PK_RegionSoldierType", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ProvinceSoldierType_Region_RegionId",
+                        name: "FK_RegionSoldierType_Region_RegionId",
                         column: x => x.RegionId,
                         principalTable: "Region",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ProvinceSoldierType_SoldierType_SoldierTypeSymbol",
+                        name: "FK_RegionSoldierType_SoldierType_SoldierTypeSymbol",
                         column: x => x.SoldierTypeSymbol,
                         principalTable: "SoldierType",
                         principalColumn: "Symbol",
@@ -470,16 +455,6 @@ namespace ImperitWASM.Server.Migrations
                 column: "SettingsCountdownSeconds");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProvinceSoldierType_RegionId",
-                table: "ProvinceSoldierType",
-                column: "RegionId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ProvinceSoldierType_SoldierTypeSymbol",
-                table: "ProvinceSoldierType",
-                column: "SoldierTypeSymbol");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Regiment_ManoeuvreId",
                 table: "Regiment",
                 column: "ManoeuvreId");
@@ -518,6 +493,16 @@ namespace ImperitWASM.Server.Migrations
                 name: "IX_Region_ShapeId",
                 table: "Region",
                 column: "ShapeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RegionSoldierType_RegionId",
+                table: "RegionSoldierType",
+                column: "RegionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RegionSoldierType_SoldierTypeSymbol",
+                table: "RegionSoldierType",
+                column: "SoldierTypeSymbol");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Sessions_P",
@@ -637,10 +622,10 @@ namespace ImperitWASM.Server.Migrations
                 name: "Powers");
 
             migrationBuilder.DropTable(
-                name: "ProvinceSoldierType");
+                name: "Regiment");
 
             migrationBuilder.DropTable(
-                name: "Regiment");
+                name: "RegionSoldierType");
 
             migrationBuilder.DropTable(
                 name: "Sessions");

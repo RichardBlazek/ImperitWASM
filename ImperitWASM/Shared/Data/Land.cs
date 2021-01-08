@@ -18,7 +18,7 @@ namespace ImperitWASM.Shared.Data
 
 		public override bool Sailable => HasPort;
 		public override bool Port => HasPort;
-		public override bool Walkable => true;
+		public override bool Mainland => true;
 		public override bool Dry => true;
 
 		public override int Price => Settings.LandPrice(Soldiers, Earnings);

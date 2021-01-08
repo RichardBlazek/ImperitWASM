@@ -51,7 +51,7 @@ namespace ImperitWASM.Server.Load
 				_ = session.HasOne<Player>().WithMany().HasForeignKey(s => s.P).Required();
 				_ = session.HasCustomKey(s => s.Key);
 			}).Entity<SoldierType>(type => type.HasCustomKey(t => t.Symbol))
-			  .Entity<ProvinceSoldierType>(recruitable => recruitable.HasOne(r => r.SoldierType).WithMany().Required())
+			  .Entity<RegionSoldierType>(recruitable => recruitable.HasOne(r => r.SoldierType).WithMany().Required())
 			  .Entity<Soldiers>(soldiers => soldiers.HasMany(s => s.Regiments).WithOne().Required())
 			  .Entity<Regiment>(regiment => regiment.HasOne(r => r.Type).WithMany().Required())
 			  .Entity<Game>(game => { }).Entity<Action>(action => { })
