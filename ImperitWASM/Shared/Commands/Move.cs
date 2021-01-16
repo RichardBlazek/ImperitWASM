@@ -12,7 +12,7 @@ namespace ImperitWASM.Shared.Commands
 		}
 		public (IEnumerable<Player>, IEnumerable<Province>) Perform(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings)
 		{
-			return (players.Select(altered => altered == actor ? altered.Add(new Manoeuvre(To, Soldiers)) : altered), provinces.Select(altered => altered == From ? altered.Subtract(Soldiers) : altered));
+			return (players.Select(altered => altered == actor ? altered.Add(new Manoeuvre(To.Id, Soldiers)) : altered), provinces.Select(altered => altered == From ? altered.Subtract(Soldiers) : altered));
 		}
 		public bool HasEnoughCapacity(Provinces provinces) => Soldiers.Capacity(provinces, From, To) >= 0;
 	}

@@ -4,18 +4,18 @@ namespace ImperitWASM.Shared.Data
 {
 	public record Manoeuvre : Action
 	{
-		public Province Province { get; private set; }
+		public int ProvinceId { get; private set; }
 		public int SoldiersId { get; private set; }
 		public Soldiers Soldiers { get; private set; }
-		public Manoeuvre(Province province, Soldiers soldiers)
+		public Manoeuvre(int provinceId, Soldiers soldiers)
 		{
-			Province = province;
+			ProvinceId = provinceId;
 			Soldiers = soldiers;
 		}
 
 		public override (Player, Provinces, Action?) Perform(Player active, Provinces provinces, Settings settings)
 		{
-			return (active, provinces.With(provinces.Select(altered => altered == Province ? altered.VisitedBy(active, Soldiers) : altered)), null);
+			return (active, provinces.With(provinces.Select(altered => altered.Id == ProvinceId ? altered.VisitedBy(active, Soldiers) : altered)), null);
 		}
 
 #pragma warning disable CS8618

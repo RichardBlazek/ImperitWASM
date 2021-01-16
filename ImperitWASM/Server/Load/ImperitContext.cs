@@ -44,7 +44,7 @@ namespace ImperitWASM.Server.Load
 			{
 				_ = player.OwnsOne(p => p.Color);
 				_ = player.HasOne(p => p.Settings).WithMany().Required();
-				_ = player.HasMany(p => p.ActionList).WithOne().Required();
+				_ = player.Ignore(p => p.Actions).HasMany(p => p.ActionList).WithOne().Required();
 				_ = player.HasOne<Game>().WithMany().Required().HasForeignKey(p => p.GameId);
 				_ = player.HasCustomKey(p => p.Name);
 			}).Entity<Session>(session =>
@@ -55,8 +55,11 @@ namespace ImperitWASM.Server.Load
 			{
 				_ = elephant.Property(e => e.Capacity).HasColumnName("Capacity");
 				_ = elephant.Property(e => e.Speed).HasColumnName("Speed");
-			}).Entity<Manoeuvre>(manoeuvre => manoeuvre.HasOne(m => m.Soldiers).WithOne().HasForeignKey<Manoeuvre>(m => m.SoldiersId).Required())
-			  .Entity<Shape>(shape => shape.Ignore(s => s.Border).HasOne(s => s.Center).WithOne().HasForeignKey<Shape>(s => s.CenterId).Required())
+			}).Entity<Manoeuvre>(manoeuvre =>
+			{
+				_ = manoeuvre.HasOne(m => m.Soldiers).WithOne().HasForeignKey<Manoeuvre>(m => m.SoldiersId).Required();
+				_ = manoeuvre.HasOne<Province>().WithMany().HasForeignKey(m => m.ProvinceId).Required();
+			}).Entity<Shape>(shape => shape.Ignore(s => s.Border).HasOne(s => s.Center).WithOne().HasForeignKey<Shape>(s => s.CenterId).Required())
 			  .Entity<SoldierType>(type => type.HasCustomKey(t => t.Symbol))
 			  .Entity<RegionSoldierType>(recruitable => recruitable.HasOne(r => r.SoldierType).WithMany().Required())
 			  .Entity<Soldiers>(soldiers => soldiers.Ignore(s => s.Types).HasMany(s => s.Regiments).WithOne().Required())

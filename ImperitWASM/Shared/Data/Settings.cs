@@ -6,7 +6,7 @@ using ImperitWASM.Shared.Value;
 
 namespace ImperitWASM.Shared.Data
 {
-	public record Settings
+	public sealed record Settings
 	{
 		public int Id { get; private set; }
 		public int CountdownSeconds { get; private set; }
@@ -20,8 +20,8 @@ namespace ImperitWASM.Shared.Data
 		public Color SeaColor { get; private set; }
 		public int DefaultMoney { get; private set; }
 		public int PlayerCount { get; private set; }
-		public virtual ICollection<SoldierType>? SoldierTypeCollection { get; private set; }
-		public virtual ICollection<Region>? RegionCollection { get; private set; }
+		public ICollection<SoldierType>? SoldierTypeCollection { get; private set; }
+		public ICollection<Region>? RegionCollection { get; private set; }
 		public Settings(Color landColor, Color mountainsColor, Color seaColor)
 		{
 			LandColor = landColor;
@@ -59,7 +59,7 @@ namespace ImperitWASM.Shared.Data
 		int StartMoney(int province) => DefaultMoney - (RegionCollection!.Single(r => r.Id == province).Income * 4);
 		public IEnumerable<(int, Robot)> GetRobots(int gameId, int previous_count, IEnumerable<int> lands, Func<string, int, string> obf) => lands.Select((land, i) => (land, CreateRobot(GetName(previous_count + i, obf), gameId, previous_count + i, land)));
 
-		public virtual bool Equals(Settings? other) => true;
+		public bool Equals(Settings? other) => true;
 		public override int GetHashCode() => -1;
 		public override string ToString() => string.Empty;
 
