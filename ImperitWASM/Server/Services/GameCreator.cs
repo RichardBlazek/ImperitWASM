@@ -39,6 +39,7 @@ namespace ImperitWASM.Server.Services
 		public Color NextColor(int gameId) => Settings.ColorOf(players[gameId].Length);
 		void Start(Game g)
 		{
+			_ = gs.Update(g.Start());
 			var prov = provinces[g.Id];
 			foreach (var (land, robot) in sl.Settings.GetRobots(g.Id, players[g.Id].Length, prov.Inhabitable.Shuffled(), players.ObsfuscateName))
 			{
@@ -53,12 +54,12 @@ namespace ImperitWASM.Server.Services
 		}
 		public Task RegisterAsync(Game game, string name, Password password, int land)
 		{
-			int count = players[game.Id].Length;
+			int count = players.Count(game.Id);
 			var player = sl.Settings.CreateHuman(name, game.Id, count, land, password);
 			players.Add(player);
-			_ = ctx.Provinces!.Update(provinces[game.Id, land].RuledBy(player));
+			provinces.Update(provinces[game.Id, land].RuledBy(player));
 
-			if (count == 2)
+			if (count == 1)
 			{
 				_ = gs.Update(game.CountDown(DateTime.UtcNow.Add(sl.Settings.Countdown)));
 			}

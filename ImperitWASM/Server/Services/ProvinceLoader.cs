@@ -27,16 +27,19 @@ namespace ImperitWASM.Server.Services
 			this.graph = graph;
 		}
 		IQueryable<Province> Included => ctx.Provinces!.Include(p => p.Player).Include(p => p.Settings).Include(p => p.Soldiers).ThenInclude(s => s.Regiments).ThenInclude(r => r.Type)
-			.Include(p => p.Region).ThenInclude(r => r.Settings).Include(r => r.Region).ThenInclude(r => r.RegionSoldierTypes).ThenInclude(t => t.SoldierType);
-		public Provinces this[int gameId] => new Provinces(Included.AsNoTracking().Where(province => province.GameId == gameId).OrderBy(province => province.RegionId).AsEnumerable().ToImmutableArray(), graph);
-		public Province this[int gameId, int regionId] => Included.AsNoTracking().Single(province => province.GameId == gameId && province.RegionId == regionId);
+			.Include(p => p.Region).ThenInclude(r => r.Settings).Include(r => r.Region).ThenInclude(r => r.RegionSoldierTypes).ThenInclude(t => t.SoldierType).AsNoTracking();
+		public Provinces this[int gameId] => new Provinces(Included.Where(province => province.GameId == gameId).OrderBy(province => province.RegionId).AsEnumerable().ToImmutableArray(), graph);
+		public Province this[int gameId, int regionId] => Included.Single(province => province.GameId == gameId && province.RegionId == regionId);
 
 		public Task AddAsync(IEnumerable<Province> provinces)
 		{
 			ctx.Provinces!.AddRange(provinces);
 			return ctx.SaveChangesAsync();
 		}
-		public void Update(Province province) => ctx.Provinces!.Update(province);
+		public void Update(Province province)
+		{
+			ctx.Entry(province).State = EntityState.Modified;
+		}
 		public Task UpdateAsync(IEnumerable<Province> provinces)
 		{
 			ctx.Provinces!.UpdateRange(provinces);

@@ -16,6 +16,8 @@ namespace ImperitWASM.Server.Load
 		{
 			string path = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory ?? ".", "Files/imperit.db");
 			_ = opt.UseSqlite("Data Source=" + path);
+			_ = opt.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+			_ = opt.EnableSensitiveDataLogging(true);
 		}
 		protected override void OnModelCreating(ModelBuilder mod)
 		{

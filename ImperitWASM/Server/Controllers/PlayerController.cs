@@ -46,7 +46,7 @@ namespace ImperitWASM.Server.Controllers
 		public async Task<LoginResult> Login([FromBody] Login trial)
 		{
 			await gameCreator.StartAllAsync();
-			return players[trial.N] is Human h && h.Password.IsCorrect(trial.P) ? new LoginResult(new Session(trial.P, await session.AddAsync(trial.P)), h.Order, h.GameId) : new LoginResult(new Session(), -1, -1);
+			return players[trial.N] is Human h && h.Password.IsCorrect(trial.P) ? new LoginResult(new Session(trial.N, await session.AddAsync(trial.N)), h.Order, h.GameId) : new LoginResult(new Session(), -1, -1);
 		}
 		[HttpPost("Logout")]
 		public Task Logout([FromBody] Session user) => session.RemoveAsync(user);

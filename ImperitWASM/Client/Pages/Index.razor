@@ -48,9 +48,9 @@
 }
 else if (State == Game.State.Started)
 {
-	<GameSwitch LogoutAsync="LogoutAsync" Session="storage.Session"/>
+	<GameSwitch LogoutAsync="LogoutAsync"/>
 }
 else
 {
-	<WaitingRoom LogoutAsync="LogoutAsync" Session="storage.Session" State="State.Value" Start="Start"/>
+	<WaitingRoom LogoutAsync="LogoutAsync" State="State.Value" Start="Start"/>
 }

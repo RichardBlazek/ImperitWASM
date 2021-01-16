@@ -16,11 +16,16 @@ namespace ImperitWASM.Server.Services
 	public class PowerLoader : IPowers
 	{
 		readonly ImperitContext ctx;
-		public PowerLoader(ImperitContext context) => ctx = context;
+		readonly IPlayers players;
+		public PowerLoader(ImperitContext ctx, IPlayers players)
+		{
+			this.ctx = ctx;
+			this.players = players;
+		}
 
 		public IEnumerable<IEnumerable<Power>> Get(int gameId)
 		{
-			int count = ctx.Players!.AsNoTracking().Count(p => p.GameId == gameId);
+			int count = players.Count(gameId);
 			return ctx.Powers!.AsNoTracking().Where(power => power.GameId == gameId).AsEnumerable().GroupBy(power => power.Order / count).OrderBy(powers => powers.Key).Select(powers => powers.OrderBy(power => power.Order));
 		}
 		public Task AddAsync(IEnumerable<Power> powers)
@@ -28,6 +33,6 @@ namespace ImperitWASM.Server.Services
 			ctx.Powers!.AddRange(powers);
 			return ctx.SaveChangesAsync();
 		}
-		public int Count(int gameId) => ctx.Powers!.AsNoTracking().Count(power => power.GameId == gameId);
+		public int Count(int gameId) => ctx.Powers!.Count(power => power.GameId == gameId);
 	}
 }

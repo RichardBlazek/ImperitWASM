@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using ImperitWASM.Client.Data;
 using ImperitWASM.Server.Load;
 
@@ -31,11 +32,18 @@ namespace ImperitWASM.Server.Services
 			{
 				token = GenerateToken(64);
 			}
-			_ = ctx.Sessions!.Add(new Session(player, token));
-			_ = await ctx.SaveChangesAsync();
+			_ = await ctx.Sessions!.Add(new Session(player, token)).Context.SaveChangesAsync();
 			return token;
 		}
 		public bool IsValid(Session session) => ctx.Sessions!.Contains(session);
-		public Task RemoveAsync(Session session) => ctx.Sessions!.Remove(session).Context.SaveChangesAsync();
+		public Task RemoveAsync(Session session)
+		{
+			if (IsValid(session))
+			{
+				ctx.Entry(session).State = EntityState.Deleted;
+				return ctx.SaveChangesAsync();
+			}
+			return Task.Run(() => { });
+		}
 	}
 }

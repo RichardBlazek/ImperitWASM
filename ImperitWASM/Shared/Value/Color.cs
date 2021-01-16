@@ -12,8 +12,11 @@ namespace ImperitWASM.Shared.Value
 		public override string ToString() => "#" + ToHex(R) + ToHex(G) + ToHex(B) + ToHex(A);
 
 		static byte Mix(byte a, byte b, byte w1, byte w2) => w1 + w2 == 0 ? 0 : (byte)(((a * w1) + (b * w2)) / (w1 + w2));
-		static byte Supl(byte x, byte y) => (byte)(255 - ((255 - x) * (255 - y) / 255));
+		static byte Neg(byte x) => (byte)(255 - x);
+		static byte Prod(byte x, byte y) => (byte)(x * y / 255);
+		static byte Supl(byte x, byte y) => Neg(Prod(Neg(x), Neg(y)));
 		public Color Mix(Color color) => new Color(Mix(R, color.R, A, color.A), Mix(G, color.G, A, color.A), Mix(B, color.B, A, color.A), Supl(A, color.A));
+		public Color Over(Color color) => new Color(Mix(R, color.R, A, Neg(A)), Mix(G, color.G, A, Neg(A)), Mix(B, color.B, A, Neg(A)), Supl(A, color.A));
 
 		public byte Light() => (byte)((R + G + B) / 3);
 		public Color WithAlpha(byte alpha) => this with { A = alpha };

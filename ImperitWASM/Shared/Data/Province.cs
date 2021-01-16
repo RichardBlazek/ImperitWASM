@@ -66,7 +66,7 @@ namespace ImperitWASM.Shared.Data
 		public bool Dry => Region.Dry;
 		public bool Port => Region.Port;
 
-		public Color Fill => Player.ColorOf(Player).Mix(Region.Fill);
+		public Color Fill => Player.ColorOf(Player).Over(Region.Fill);
 		public Color Stroke => Region.Stroke;
 		public float StrokeWidth => Region.StrokeWidth;
 

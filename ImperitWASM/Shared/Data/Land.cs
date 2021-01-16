@@ -6,8 +6,8 @@ namespace ImperitWASM.Shared.Data
 	public record Land : Region
 	{
 		public int Earnings { get; private set; }
-		public bool IsStart { get; private set; }
 		public bool IsFinal { get; private set; }
+		public bool IsStart { get; private set; }
 		public bool HasPort { get; private set; }
 		public Land(string name, Shape shape, Soldiers soldiers, Settings settings, int earnings, bool isStart, bool isFinal, bool hasPort)
 			: base(name, shape, soldiers, settings) => (Earnings, IsStart, IsFinal, HasPort) = (earnings, isStart, isFinal, hasPort);
