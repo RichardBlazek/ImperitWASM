@@ -3,14 +3,16 @@ using System;
 using ImperitWASM.Server.Load;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace ImperitWASM.Server.Migrations
 {
     [DbContext(typeof(ImperitContext))]
-    partial class ImperitContextModelSnapshot : ModelSnapshot
+    [Migration("20210117204336_IM7")]
+    partial class IM7
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

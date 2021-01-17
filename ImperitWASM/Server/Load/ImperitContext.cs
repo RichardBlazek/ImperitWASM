@@ -14,10 +14,8 @@ namespace ImperitWASM.Server.Load
 		public DbSet<Settings>? Settings { get; set; }
 		protected override void OnConfiguring(DbContextOptionsBuilder opt)
 		{
-			string path = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory ?? ".", "Files/imperit.db");
-			_ = opt.UseSqlite("Data Source=" + path);
+			_ = opt.UseSqlite("Data Source=" + System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory ?? ".", "Files/imperit.db"));
 			_ = opt.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-			_ = opt.EnableSensitiveDataLogging(true);
 		}
 		protected override void OnModelCreating(ModelBuilder mod)
 		{
@@ -30,9 +28,10 @@ namespace ImperitWASM.Server.Load
 				_ = settings.Ignore(s => s.SoldierTypes).HasMany(s => s.SoldierTypeCollection).WithOne().Required();
 			}).Entity<Province>(province =>
 			{
+				_ = province.HasKey(p => new { p.GameId, p.RegionId });
 				_ = province.HasOne(p => p.Player).WithMany().Cascade();
 				_ = province.HasOne(p => p.Settings).WithMany().Required();
-				_ = province.HasOne(p => p.Soldiers).WithOne().HasPrincipalKey<Soldiers>(p => p.Id).Required();
+				_ = province.HasOne(p => p.Soldiers).WithOne().HasPrincipalKey<Soldiers>(s => s.Id).Required();
 				_ = province.HasOne(p => p.Region).WithMany().HasForeignKey(p => p.RegionId).Required();
 				_ = province.HasOne<Game>().WithMany().HasForeignKey(p => p.GameId).Required();
 				_ = province.Ignore(p => p.Center).Ignore(p => p.Border);
@@ -57,11 +56,8 @@ namespace ImperitWASM.Server.Load
 			{
 				_ = elephant.Property(e => e.Capacity).HasColumnName("Capacity");
 				_ = elephant.Property(e => e.Speed).HasColumnName("Speed");
-			}).Entity<Manoeuvre>(manoeuvre =>
-			{
-				_ = manoeuvre.HasOne(m => m.Soldiers).WithOne().HasForeignKey<Manoeuvre>(m => m.SoldiersId).Required();
-				_ = manoeuvre.HasOne<Province>().WithMany().HasForeignKey(m => m.ProvinceId).Required();
-			}).Entity<Shape>(shape => shape.Ignore(s => s.Border).HasOne(s => s.Center).WithOne().HasForeignKey<Shape>(s => s.CenterId).Required())
+			}).Entity<Manoeuvre>(manoeuvre => manoeuvre.HasOne(m => m.Soldiers).WithOne().HasForeignKey<Manoeuvre>(m => m.SoldiersId).Required())
+			  .Entity<Shape>(shape => shape.Ignore(s => s.Border).HasOne(s => s.Center).WithOne().HasForeignKey<Shape>(s => s.CenterId).Required())
 			  .Entity<SoldierType>(type => type.HasCustomKey(t => t.Symbol))
 			  .Entity<RegionSoldierType>(recruitable => recruitable.HasOne(r => r.SoldierType).WithMany().Required())
 			  .Entity<Soldiers>(soldiers => soldiers.Ignore(s => s.Types).HasMany(s => s.Regiments).WithOne().Required())

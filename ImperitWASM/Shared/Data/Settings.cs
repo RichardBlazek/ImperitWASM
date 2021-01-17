@@ -54,10 +54,10 @@ namespace ImperitWASM.Shared.Data
 		public Human CreateHuman(string name, int gameId, int i, int land, Password password) => new Human(name, gameId, i, ColorOf(i), StartMoney(land), true, this, i == 0, password);
 		Robot CreateRobot(string name, int gameId, int i, int land) => new Robot(name, gameId, i, ColorOf(i), StartMoney(land), true, this, false);
 
-		public IEnumerable<Province> Provinces(int gameId) => RegionCollection!.Select(reg => new Province(gameId, reg, reg.Soldiers, this));
+		public List<Province> Provinces(int gameId) => RegionCollection!.Select(reg => new Province(gameId, reg, reg.Soldiers, this)).ToList();
 
 		int StartMoney(int province) => DefaultMoney - (RegionCollection!.Single(r => r.Id == province).Income * 4);
-		public IEnumerable<(int, Robot)> GetRobots(int gameId, int previous_count, IEnumerable<int> lands, Func<string, int, string> obf) => lands.Select((land, i) => (land, CreateRobot(GetName(previous_count + i, obf), gameId, previous_count + i, land)));
+		public List<(int, Robot)> GetRobots(int gameId, int previous_count, IEnumerable<int> lands, Func<string, int, string> obf) => lands.Select((land, i) => (land, CreateRobot(GetName(previous_count + i, obf), gameId, previous_count + i, land))).ToList();
 
 		public bool Equals(Settings? other) => true;
 		public override int GetHashCode() => -1;

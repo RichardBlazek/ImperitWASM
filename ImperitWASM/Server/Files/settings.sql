@@ -7,6 +7,7 @@ INSERT INTO __EFMigrationsHistory VALUES('20210108135827_IM3','5.0.1');
 INSERT INTO __EFMigrationsHistory VALUES('20210108142227_IM4','5.0.1');
 INSERT INTO __EFMigrationsHistory VALUES('20210108152353_IM5','5.0.1');
 INSERT INTO __EFMigrationsHistory VALUES('20210116143925_IM6','5.0.1');
+INSERT INTO __EFMigrationsHistory VALUES('20210117204336_IM7','5.0.1');
 CREATE TABLE IF NOT EXISTS "Games" (
     "Id" INTEGER NOT NULL CONSTRAINT "PK_Games" PRIMARY KEY AUTOINCREMENT,
     "Current" INTEGER NOT NULL,
@@ -197,18 +198,6 @@ CREATE TABLE IF NOT EXISTS "Sessions" (
     "Key" TEXT NOT NULL CONSTRAINT "PK_Sessions" PRIMARY KEY,
     "P" TEXT NOT NULL,
     CONSTRAINT "FK_Sessions_Players_P" FOREIGN KEY ("P") REFERENCES "Players" ("Name") ON DELETE CASCADE
-);
-CREATE TABLE IF NOT EXISTS "Provinces" (
-    "Id" INTEGER NOT NULL CONSTRAINT "PK_Provinces" PRIMARY KEY,
-    "GameId" INTEGER NOT NULL,
-    "RegionId" INTEGER NOT NULL,
-    "PlayerName" TEXT NULL,
-    "SettingsId" INTEGER NOT NULL,
-    CONSTRAINT "FK_Provinces_Games_GameId" FOREIGN KEY ("GameId") REFERENCES "Games" ("Id") ON DELETE CASCADE,
-    CONSTRAINT "FK_Provinces_Players_PlayerName" FOREIGN KEY ("PlayerName") REFERENCES "Players" ("Name") ON DELETE CASCADE,
-    CONSTRAINT "FK_Provinces_Settings_SettingsId" FOREIGN KEY ("SettingsId") REFERENCES "Settings" ("Id") ON DELETE CASCADE,
-    CONSTRAINT "FK_Provinces_Soldiers_Id" FOREIGN KEY ("Id") REFERENCES "Soldiers" ("Id") ON DELETE CASCADE,
-    CONSTRAINT "FK_Provinces_Region_RegionId" FOREIGN KEY ("RegionId") REFERENCES "Region" ("Id") ON DELETE CASCADE
 );
 CREATE TABLE IF NOT EXISTS "Shape" (
     "Id" INTEGER NOT NULL CONSTRAINT "PK_Shape" PRIMARY KEY AUTOINCREMENT,
@@ -1587,11 +1576,23 @@ CREATE TABLE IF NOT EXISTS "Action" (
     "Debt" INTEGER NULL,
     "Discriminator" TEXT NOT NULL,
     "PlayerName" TEXT NOT NULL,
-    "ProvinceId" INTEGER NULL,
+    "RegionId" INTEGER NULL,
     "SoldiersId" INTEGER NULL,
     CONSTRAINT "FK_Action_Players_PlayerName" FOREIGN KEY ("PlayerName") REFERENCES "Players" ("Name") ON DELETE CASCADE,
-    CONSTRAINT "FK_Action_Provinces_ProvinceId" FOREIGN KEY ("ProvinceId") REFERENCES "Provinces" ("Id") ON DELETE CASCADE,
     CONSTRAINT "FK_Action_Soldiers_SoldiersId" FOREIGN KEY ("SoldiersId") REFERENCES "Soldiers" ("Id") ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS "Provinces" (
+    "GameId" INTEGER NOT NULL,
+    "RegionId" INTEGER NOT NULL,
+    "PlayerName" TEXT NULL,
+    "SettingsId" INTEGER NOT NULL,
+    "SoldiersId" INTEGER NOT NULL,
+    CONSTRAINT "PK_Provinces" PRIMARY KEY ("GameId", "RegionId"),
+    CONSTRAINT "FK_Provinces_Games_GameId" FOREIGN KEY ("GameId") REFERENCES "Games" ("Id") ON DELETE CASCADE,
+    CONSTRAINT "FK_Provinces_Players_PlayerName" FOREIGN KEY ("PlayerName") REFERENCES "Players" ("Name") ON DELETE CASCADE,
+    CONSTRAINT "FK_Provinces_Region_RegionId" FOREIGN KEY ("RegionId") REFERENCES "Region" ("Id") ON DELETE CASCADE,
+    CONSTRAINT "FK_Provinces_Settings_SettingsId" FOREIGN KEY ("SettingsId") REFERENCES "Settings" ("Id") ON DELETE CASCADE,
+    CONSTRAINT "FK_Provinces_Soldiers_SoldiersId" FOREIGN KEY ("SoldiersId") REFERENCES "Soldiers" ("Id") ON DELETE CASCADE
 );
 DELETE FROM sqlite_sequence;
 INSERT INTO sqlite_sequence VALUES('Settings',0);
@@ -1606,10 +1607,6 @@ INSERT INTO sqlite_sequence VALUES('Action',0);
 CREATE INDEX "IX_Players_GameId" ON "Players" ("GameId");
 CREATE INDEX "IX_Players_SettingsId" ON "Players" ("SettingsId");
 CREATE INDEX "IX_Point_ShapeId1" ON "Point" ("ShapeId1");
-CREATE INDEX "IX_Provinces_GameId" ON "Provinces" ("GameId");
-CREATE INDEX "IX_Provinces_PlayerName" ON "Provinces" ("PlayerName");
-CREATE INDEX "IX_Provinces_RegionId" ON "Provinces" ("RegionId");
-CREATE INDEX "IX_Provinces_SettingsId" ON "Provinces" ("SettingsId");
 CREATE INDEX "IX_RegionSoldierType_RegionId" ON "RegionSoldierType" ("RegionId");
 CREATE INDEX "IX_RegionSoldierType_SoldierTypeSymbol" ON "RegionSoldierType" ("SoldierTypeSymbol");
 CREATE INDEX "IX_Sessions_P" ON "Sessions" ("P");
@@ -1621,6 +1618,9 @@ CREATE INDEX "IX_Regiment_SoldiersId" ON "Regiment" ("SoldiersId");
 CREATE INDEX "IX_Regiment_TypeSymbol" ON "Regiment" ("TypeSymbol");
 CREATE INDEX "IX_SoldierType_SettingsId" ON "SoldierType" ("SettingsId");
 CREATE INDEX "IX_Action_PlayerName" ON "Action" ("PlayerName");
-CREATE INDEX "IX_Action_ProvinceId" ON "Action" ("ProvinceId");
 CREATE UNIQUE INDEX "IX_Action_SoldiersId" ON "Action" ("SoldiersId");
+CREATE INDEX "IX_Provinces_PlayerName" ON "Provinces" ("PlayerName");
+CREATE INDEX "IX_Provinces_RegionId" ON "Provinces" ("RegionId");
+CREATE INDEX "IX_Provinces_SettingsId" ON "Provinces" ("SettingsId");
+CREATE UNIQUE INDEX "IX_Provinces_SoldiersId" ON "Provinces" ("SoldiersId");
 COMMIT;

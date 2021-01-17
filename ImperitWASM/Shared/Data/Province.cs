@@ -5,7 +5,6 @@ namespace ImperitWASM.Shared.Data
 {
 	public sealed record Province
 	{
-		public int Id { get; private set; }
 		public int GameId { get; private set; }
 		public int RegionId { get; private set; }
 		public Region Region { get; private set; }
