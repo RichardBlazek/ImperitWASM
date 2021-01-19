@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using ImperitWASM.Server.Load;
 using ImperitWASM.Shared;
@@ -37,20 +38,20 @@ namespace ImperitWASM.Server.Services
 			return game.Id;
 		}
 		public Color NextColor(int gameId) => Settings.ColorOf(players[gameId].Length);
-		void Start(Game g)
+		Task StartAsync(Game g)
 		{
 			_ = gs.Update(g.Start());
 			var prov = provinces[g.Id];
-			foreach (var (land, robot) in sl.Settings.GetRobots(g.Id, players[g.Id].Length, prov.Inhabitable.Shuffled(), players.ObsfuscateName))
-			{
-				players.Add(robot);
-				provinces.Update(prov[land].RuledBy(robot));
-			}
+			var robots = sl.Settings.GetRobots(g.Id, players[g.Id].Length, prov.Inhabitable.Shuffled(), players.ObsfuscateName);
+			players.Add(robots.Select(pair => pair.Item2));
+			return provinces.UpdateAsync(robots.Select(pair => prov[pair.Item1].RuledBy(pair.Item2)));
 		}
-		public Task StartAllAsync()
+		public async Task StartAllAsync()
 		{
-			gs.ShouldStart.Each(Start);
-			return ctx.SaveChangesAsync();
+			foreach (var game in gs.ShouldStart)
+			{
+				await StartAsync(game);
+			}
 		}
 		public Task RegisterAsync(Game game, string name, Password password, int land)
 		{
@@ -65,7 +66,7 @@ namespace ImperitWASM.Server.Services
 			}
 			else if (count + 1 >= sl.Settings.PlayerCount)
 			{
-				Start(game);
+				return StartAsync(game);
 			}
 			return ctx.SaveChangesAsync();
 		}

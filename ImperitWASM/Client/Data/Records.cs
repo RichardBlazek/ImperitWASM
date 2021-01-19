@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Immutable;
 using ImperitWASM.Shared.Data;
 using ImperitWASM.Shared.Value;
 
@@ -29,6 +30,7 @@ namespace ImperitWASM.Client.Data
 	public sealed record RegisteredPlayer(string N, string P, int S, int G);
 	public enum RegistrationErrors { Ok, UsedName, NoName, InvalidStart, NoPassword, BadGame }
 	public sealed record SoldierItem(string N, string S, string T, int P);
+	public sealed record StartInfo(Game.State? S, DateTime D);
 	public sealed record Switch(int? Select, View View, int? From, int? To);
 	public enum View { Map, Donation, Move, Preview, Purchase, Recruit, Statistics }
 	public sealed record Winner(string N, Color C);

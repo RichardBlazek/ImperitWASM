@@ -25,8 +25,9 @@ namespace ImperitWASM.Shared.Value
 					return true;
 				}
 				var neighbors = Neighbors[stack[i].Pos];
-				for (int n = 0, vertex = neighbors[n]; n < neighbors.Length; ++n, vertex = neighbors[n])
+				for (int n = 0; n < neighbors.Length; ++n)
 				{
+					int vertex = neighbors[n];
 					if (!visited[n] && stack[i].Distance + difficulty(stack[i].Pos, vertex) <= limit)
 					{
 						stack.Add((vertex, stack[i].Distance + difficulty(stack[i].Pos, vertex)));
@@ -49,8 +50,9 @@ namespace ImperitWASM.Shared.Value
 					for (int i = 0; i < points.Count; ++i)
 					{
 						var neighbors = Neighbors[points[i]];
-						for (int n = 0, vertex = neighbors[n]; n < neighbors.Length; ++n, vertex = neighbors[n])
+						for (int n = 0; n < neighbors.Length; ++n)
 						{
+							int vertex = neighbors[n];
 							if (!visited[vertex] && passable(points[i], vertex))
 							{
 								visited[vertex] = true;

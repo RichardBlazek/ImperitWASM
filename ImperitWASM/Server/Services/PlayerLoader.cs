@@ -13,6 +13,7 @@ namespace ImperitWASM.Server.Services
 		ImmutableArray<Player> this[int gameId] { get; }
 		Player? this[string? name] { get; }
 		void Add(Player player);
+		void Add(IEnumerable<Player> players);
 		Task UpdateAsync(IEnumerable<Player> players);
 		bool IsFreeName(string name);
 		string ObsfuscateName(string name, int repetition);
@@ -27,6 +28,7 @@ namespace ImperitWASM.Server.Services
 		public ImmutableArray<Player> this[int gameId] => Included.Where(player => player.GameId == gameId).OrderBy(player => player.Order).AsEnumerable().ToImmutableArray();
 		public Player? this[string? name] => Included.SingleOrDefault(player => player.Name == name);
 		public void Add(Player player) => ctx.Players!.Add(player);
+		public void Add(IEnumerable<Player> players) => ctx.Players!.AddRange(players);
 		public Task UpdateAsync(IEnumerable<Player> players)
 		{
 			ctx.Players!.UpdateRange(players);

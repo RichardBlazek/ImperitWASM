@@ -16,7 +16,7 @@ namespace ImperitWASM.Server
 		{
 			_ = services.AddControllersWithViews();
 			_ = services.AddRazorPages();
-			_ = services.AddDbContext<ImperitContext>(ServiceLifetime.Singleton).AddSingleton<ISettings, SettingsLoader>()
+			_ = services.AddSingleton<ISettings, SettingsLoader>().AddDbContext<ImperitContext>()
 						.AddSingleton(_ => GraphLoader.Graph(System.AppDomain.CurrentDomain.BaseDirectory ?? ".", "Files/Graph.json"))
 						.AddTransient<IPowers, PowerLoader>().AddTransient<ISessions, SessionLoader>()
 						.AddTransient<IProvinces, ProvinceLoader>().AddTransient<IGames, GameLoader>()

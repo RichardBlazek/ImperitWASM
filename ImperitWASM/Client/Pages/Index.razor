@@ -38,7 +38,7 @@
 	{
 		await storage.LoadAsync();
 		await UpdateState();
-		await provinces.Load("api/Provinces/Default");
+		await provinces.Load("api/Provinces");
 		await settings.LoadAsync("api/Settings/Types");
 	}
 }

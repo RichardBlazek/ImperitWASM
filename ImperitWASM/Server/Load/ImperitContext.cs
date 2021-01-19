@@ -1,4 +1,5 @@
-﻿using ImperitWASM.Client.Data;
+﻿using System.Linq;
+using ImperitWASM.Client.Data;
 using ImperitWASM.Shared.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,10 +13,12 @@ namespace ImperitWASM.Server.Load
 		public DbSet<Province>? Provinces { get; set; }
 		public DbSet<Power>? Powers { get; set; }
 		public DbSet<Settings>? Settings { get; set; }
+		public ImperitContext() => ChangeTracker.LazyLoadingEnabled = false;
 		protected override void OnConfiguring(DbContextOptionsBuilder opt)
 		{
 			_ = opt.UseSqlite("Data Source=" + System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory ?? ".", "Files/imperit.db"));
 			_ = opt.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+
 		}
 		protected override void OnModelCreating(ModelBuilder mod)
 		{
@@ -69,6 +72,14 @@ namespace ImperitWASM.Server.Load
 			  .Entity<OutlandishShip>(ship => ship.Property(os => os.Speed).HasColumnName("Speed"));
 
 			base.OnModelCreating(mod);
+		}
+		public void DetachAllEntities()
+		{
+			var tracked = ChangeTracker.Entries().Where(e => e.State != EntityState.Detached).ToList();
+			for (int i = 0; i < tracked.Count; i++)
+			{
+				tracked[i].State = EntityState.Detached;
+			}
 		}
 	}
 }

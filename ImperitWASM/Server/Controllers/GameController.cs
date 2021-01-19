@@ -32,13 +32,13 @@ namespace ImperitWASM.Server.Controllers
 			this.powers = powers;
 		}
 		[HttpPost("Info")]
-		public GameInfo Info([FromBody] string player)
+		public GameInfo Info([FromBody] string player) => players[player] is Human H ? new(gs.Find(H.GameId)?.Current, H.IsActive) : new(null, false);
+		[HttpPost("StartInfo")]
+		public async Task<StartInfo> StartInfo([FromBody] int gameId)
 		{
-			var p = players[player];
-			return new GameInfo(gs.Find(p?.GameId ?? 0)?.Current, p?.IsActive ?? false);
+			await gameCreator.StartAllAsync();
+			return gs.Find(gameId) is Game g ? new(g.Current, g.StartTime) : new(null, DateTime.MinValue);
 		}
-		[HttpPost("StartTime")]
-		public DateTime? StartTime([FromBody] int gameId) => gs.Find(gameId)?.StartTime;
 		[HttpPost("Winner")]
 		public Winner? Winner([FromBody] int gameId) => provinces[gameId].Winner is (Human H, _) ? new Winner(H.Name, H.Color) : null;
 		async Task<RegistrationErrors> DoRegistrationAsync(RegisteredPlayer player, Game game)

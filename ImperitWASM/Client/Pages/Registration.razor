@@ -1,7 +1,7 @@
 @inject ImperitClient http;
 @inject ProvinceContainer provinces;
 
-@using Mode = StartSwitch.Mode; 
+@using Mode = StartSwitch.Mode;
 
 @code{
 	[Parameter] public Action<Mode> Set { get; set; } = _ => { };
