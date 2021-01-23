@@ -36,14 +36,13 @@ namespace ImperitWASM.Server.Services
 			return token;
 		}
 		public bool IsValid(Session session) => ctx.Sessions!.Contains(session);
-		public Task RemoveAsync(Session session)
+		public async Task RemoveAsync(Session session)
 		{
 			if (IsValid(session))
 			{
 				ctx.Entry(session).State = EntityState.Deleted;
-				return ctx.SaveChangesAsync();
+				_ = await ctx.SaveChangesAsync();
 			}
-			return Task.Run(() => { });
 		}
 	}
 }

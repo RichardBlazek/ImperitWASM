@@ -28,7 +28,10 @@ namespace ImperitWASM.Server.Services
 			{
 				bool finish = !players.Any(player => player is Human { Alive: true }) || (provinces.Winner is (Human, int finals) && finals >= sl.Settings.FinalLandsCount);
 				int turn = powers.Count(gameId);
-				_ = gs.Update(gameId, game => finish ? game.Finish() : game);
+				if (finish)
+				{
+					await gs.FinishAsync(gameId);
+				}
 				await powers.AddAsync(players.Select((player, i) => player.Power(turn + i, provinces.ControlledBy(player))));
 				return finish;
 			}

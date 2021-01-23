@@ -14,11 +14,13 @@ namespace ImperitWASM.Server.Services
 		readonly IPlayers players;
 		readonly IProvinces provinces;
 		readonly ISettings sl;
-		public CommandProvider(IPlayers players, IProvinces provinces, ISettings sl)
+		readonly IChangeSaver changes;
+		public CommandProvider(IPlayers players, IProvinces provinces, ISettings sl, IChangeSaver changes)
 		{
 			this.players = players;
 			this.provinces = provinces;
 			this.sl = sl;
+			this.changes = changes;
 		}
 		public async Task<(bool, ImmutableArray<Player>, Provinces)> PerformAsync(string actorName, ICommand command)
 		{
@@ -32,8 +34,9 @@ namespace ImperitWASM.Server.Services
 				var player_array = new_players.ToImmutableArray();
 				var province_array = new_provinces.ToImmutableArray();
 
-				await players.UpdateAsync(new_players);
-				await provinces.UpdateAsync(new_provinces);
+				players.Update(new_players);
+				provinces.Update(new_provinces);
+				await changes.SaveAsync();
 				return (true, player_array, loaded_provinces.With(province_array));
 			}
 			return (false, loaded_players, loaded_provinces);

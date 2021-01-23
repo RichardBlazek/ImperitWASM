@@ -21,7 +21,6 @@ namespace ImperitWASM.Server.Services
 				.Include(settings => settings.RegionCollection).ThenInclude(region => region.Shape).ThenInclude(shape => shape.Points)
 				.Include(settings => settings.RegionCollection).ThenInclude(region => region.RegionSoldierTypes).ThenInclude(pst => pst.SoldierType)
 				.Include(settings => settings.RegionCollection).ThenInclude(region => region.Soldiers).ThenInclude(soldiers => soldiers.Regiments).ThenInclude(regiment => regiment.Type).Single();
-			ctx.DetachAllEntities();
 		}
 	}
 }

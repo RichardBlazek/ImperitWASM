@@ -1,4 +1,4 @@
-﻿using System.Linq;
+﻿using System.Threading.Tasks;
 using ImperitWASM.Client.Data;
 using ImperitWASM.Shared.Data;
 using Microsoft.EntityFrameworkCore;
@@ -14,11 +14,11 @@ namespace ImperitWASM.Server.Load
 		public DbSet<Power>? Powers { get; set; }
 		public DbSet<Settings>? Settings { get; set; }
 		public ImperitContext() => ChangeTracker.LazyLoadingEnabled = false;
+		public Task<int> RunSqlAsync(string cmd) => Database.ExecuteSqlRawAsync(cmd);
 		protected override void OnConfiguring(DbContextOptionsBuilder opt)
 		{
 			_ = opt.UseSqlite("Data Source=" + System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory ?? ".", "Files/imperit.db"));
 			_ = opt.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-
 		}
 		protected override void OnModelCreating(ModelBuilder mod)
 		{
@@ -60,26 +60,18 @@ namespace ImperitWASM.Server.Load
 				_ = elephant.Property(e => e.Capacity).HasColumnName("Capacity");
 				_ = elephant.Property(e => e.Speed).HasColumnName("Speed");
 			}).Entity<Manoeuvre>(manoeuvre => manoeuvre.HasOne(m => m.Soldiers).WithOne().HasForeignKey<Manoeuvre>(m => m.SoldiersId).Required())
-			  .Entity<Shape>(shape => shape.Ignore(s => s.Border).HasOne(s => s.Center).WithOne().HasForeignKey<Shape>(s => s.CenterId).Required())
-			  .Entity<SoldierType>(type => type.HasCustomKey(t => t.Symbol))
-			  .Entity<RegionSoldierType>(recruitable => recruitable.HasOne(r => r.SoldierType).WithMany().Required())
-			  .Entity<Soldiers>(soldiers => soldiers.Ignore(s => s.Types).HasMany(s => s.Regiments).WithOne().Required())
-			  .Entity<Regiment>(regiment => regiment.HasOne(r => r.Type).WithMany().Required())
-			  .Entity<Game>(game => { }).Entity<Action>(action => { }).Entity<Loan>(loan => { })
-			  .Entity<Human>(human => { }).Entity<Robot>(robot => { }).Entity<Land>(land => { })
-			  .Entity<Sea>(sea => { }).Entity<Mountains>(mountains => { }).Entity<Pedestrian>(_ => { })
-			  .Entity<Ship>(ship => ship.Property(s => s.Capacity).HasColumnName("Capacity"))
-			  .Entity<OutlandishShip>(ship => ship.Property(os => os.Speed).HasColumnName("Speed"));
+				.Entity<Shape>(shape => shape.Ignore(s => s.Border).HasOne(s => s.Center).WithOne().HasForeignKey<Shape>(s => s.CenterId).Required())
+				.Entity<SoldierType>(type => type.HasCustomKey(t => t.Symbol))
+				.Entity<RegionSoldierType>(recruitable => recruitable.HasOne(r => r.SoldierType).WithMany().Required())
+				.Entity<Soldiers>(soldiers => soldiers.Ignore(s => s.Types).HasMany(s => s.Regiments).WithOne().Required())
+				.Entity<Regiment>(regiment => regiment.HasOne(r => r.Type).WithMany().Required())
+				.Entity<Game>(game => { }).Entity<Action>(action => { }).Entity<Loan>(loan => { })
+				.Entity<Human>(human => { }).Entity<Robot>(robot => { }).Entity<Land>(land => { })
+				.Entity<Sea>(sea => { }).Entity<Mountains>(mountains => { }).Entity<Pedestrian>(_ => { })
+				.Entity<Ship>(ship => ship.Property(s => s.Capacity).HasColumnName("Capacity"))
+				.Entity<OutlandishShip>(ship => ship.Property(os => os.Speed).HasColumnName("Speed"));
 
 			base.OnModelCreating(mod);
-		}
-		public void DetachAllEntities()
-		{
-			var tracked = ChangeTracker.Entries().Where(e => e.State != EntityState.Detached).ToList();
-			for (int i = 0; i < tracked.Count; i++)
-			{
-				tracked[i].State = EntityState.Detached;
-			}
 		}
 	}
 }

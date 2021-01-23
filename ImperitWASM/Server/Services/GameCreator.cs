@@ -21,39 +21,43 @@ namespace ImperitWASM.Server.Services
 		readonly IPlayers players;
 		readonly IGames gs;
 		readonly ISettings sl;
-		readonly ImperitContext ctx;
-		public GameCreator(IProvinces provinces, IGames gs, ISettings sl, ImperitContext ctx, IPlayers players)
+		readonly IChangeSaver changes;
+		public GameCreator(IProvinces provinces, IGames gs, ISettings sl, IChangeSaver changes, IPlayers players)
 		{
 			this.provinces = provinces;
 			this.gs = gs;
 			this.sl = sl;
-			this.ctx = ctx;
+			this.changes = changes;
 			this.players = players;
 		}
 		public async Task<int> CreateAsync()
 		{
 			var game = await gs.AddAsync();
 			gs.RemoveOld(DateTime.UtcNow.AddDays(-1.0));
-			await provinces.AddAsync(sl.Settings.Provinces(game.Id));
+			provinces.Add(sl.Settings.Provinces(game.Id));
+			await changes.SaveAsync();
 			return game.Id;
 		}
 		public Color NextColor(int gameId) => Settings.ColorOf(players[gameId].Length);
-		Task StartAsync(Game g)
+		async Task StartAsync(int gameId)
 		{
-			_ = gs.Update(g.Start());
-			var prov = provinces[g.Id];
-			var robots = sl.Settings.GetRobots(g.Id, players[g.Id].Length, prov.Inhabitable.Shuffled(), players.ObsfuscateName);
-			players.Add(robots.Select(pair => pair.Item2));
-			return provinces.UpdateAsync(robots.Select(pair => prov[pair.Item1].RuledBy(pair.Item2)));
+			await gs.StartAsync(gameId);
+			var prov = provinces[gameId];
+			foreach (var (land, robot) in sl.Settings.GetRobots(gameId, players[gameId].Length, prov.Inhabitable.Shuffled(), players.ObsfuscateName))
+			{
+				players.Add(robot);
+				provinces.Update(prov[land].RuledBy(robot));
+			}
 		}
 		public async Task StartAllAsync()
 		{
-			foreach (var game in gs.ShouldStart)
+			foreach (int gameId in gs.ShouldStart)
 			{
-				await StartAsync(game);
+				await StartAsync(gameId);
 			}
+			await changes.SaveAsync();
 		}
-		public Task RegisterAsync(Game game, string name, Password password, int land)
+		public async Task RegisterAsync(Game game, string name, Password password, int land)
 		{
 			int count = players.Count(game.Id);
 			var player = sl.Settings.CreateHuman(name, game.Id, count, land, password);
@@ -62,13 +66,13 @@ namespace ImperitWASM.Server.Services
 
 			if (count == 1)
 			{
-				_ = gs.Update(game.CountDown(DateTime.UtcNow.Add(sl.Settings.Countdown)));
+				await gs.CountDownAsync(game.Id);
 			}
-			else if (count + 1 >= sl.Settings.PlayerCount)
+			if (count + 1 >= sl.Settings.PlayerCount)
 			{
-				return StartAsync(game);
+				await StartAsync(game.Id);
 			}
-			return ctx.SaveChangesAsync();
+			await changes.SaveAsync();
 		}
 	}
 }

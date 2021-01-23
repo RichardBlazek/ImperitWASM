@@ -43,7 +43,7 @@ namespace ImperitWASM.Shared.Data
 		public static int LandPrice(Soldiers soldiers, int earnings) => soldiers.Price + soldiers.DefensePower + earnings;
 		public Ratio Instability(Soldiers now, Soldiers start) => DefaultInstability.Adjust(Math.Max(start.DefensePower - now.DefensePower, 0), start.DefensePower);
 
-		static readonly string Vowels = "aeiou", Consonant = "bcdfghjklmnprstvz";
+		static readonly string Vowels = "aeiouy", Consonant = "bcdfghjklmnprstvz";
 
 		static char IndexChar(bool vowel, int i) => vowel ? Vowels[i % Vowels.Length] : Consonant[i % Consonant.Length];
 		static char UpperIf(bool upper, char c) => upper ? char.ToUpperInvariant(c) : c;

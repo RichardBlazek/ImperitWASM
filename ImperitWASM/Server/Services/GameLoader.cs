@@ -11,17 +11,23 @@ namespace ImperitWASM.Server.Services
 	public interface IGames
 	{
 		Task<Game> AddAsync();
-		Game? Find(int gameId);
-		Game? Update(int gameId, Func<Game, Game> update);
-		Game Update(Game game);
 		void RemoveOld(DateTime limit);
-		ImmutableArray<Game> ShouldStart { get; }
+		Game? Find(int gameId);
+		Task CountDownAsync(int gameId);
+		Task StartAsync(int gameId);
+		Task FinishAsync(int gameId);
+		ImmutableArray<int> ShouldStart { get; }
 		int? RegistrableGame { get; }
 	}
 	public class GameLoader : IGames
 	{
 		readonly ImperitContext ctx;
-		public GameLoader(ImperitContext ctx) => this.ctx = ctx;
+		readonly ISettings sl;
+		public GameLoader(ImperitContext ctx, ISettings sl)
+		{
+			this.ctx = ctx;
+			this.sl = sl;
+		}
 
 		public async Task<Game> AddAsync()
 		{
@@ -30,11 +36,12 @@ namespace ImperitWASM.Server.Services
 			return game;
 		}
 		public void RemoveOld(DateTime limit) => ctx.Games!.RemoveRange(ctx.Games.Where(game => game.Current == Game.State.Finished && game.FinishTime < limit));
-		public Game? Find(int gameId) => ctx.Games.AsNoTracking().SingleOrDefault(game => game.Id == gameId);
-		public Game? Update(int gameId, Func<Game, Game> update) => Find(gameId) is Game g ? ctx.Games!.Update(g).Entity : null;
-		public Game Update(Game game) => ctx.Games!.Update(game).Entity;
+		public Game? Find(int gameId) => ctx.Games!.SingleOrDefault(game => game.Id == gameId);
+		public Task CountDownAsync(int gameId) => ctx.RunSqlAsync($"UPDATE Games SET Current={(int)Game.State.CountDown}, StartTime={DateTime.UtcNow.AddSeconds(sl.Settings.CountdownSeconds)} WHERE Id={gameId};");
+		public Task StartAsync(int gameId) => ctx.RunSqlAsync($"UPDATE Games SET Current={(int)Game.State.Started} WHERE Id={gameId};");
+		public Task FinishAsync(int gameId) => ctx.RunSqlAsync($"UPDATE Games SET Current={(int)Game.State.Finished}, FinishTime={DateTime.UtcNow} WHERE Id={gameId};");
 
-		public ImmutableArray<Game> ShouldStart => ctx.Games!.AsNoTracking().Where(game => game.Current == Game.State.CountDown && game.StartTime <= DateTime.UtcNow).ToImmutableArray();
-		public int? RegistrableGame => ctx.Games!.AsNoTracking().FirstOrDefault(game => game.Current == Game.State.CountDown || game.Current == Game.State.Created)?.Id;
+		public ImmutableArray<int> ShouldStart => ctx.Games!.Where(game => game.Current == Game.State.CountDown && game.StartTime <= DateTime.UtcNow).Select(g => g.Id).ToImmutableArray();
+		public int? RegistrableGame => ctx.Games!.FirstOrDefault(game => game.Current == Game.State.CountDown || game.Current == Game.State.Created)?.Id;
 	}
 }
