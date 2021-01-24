@@ -65,9 +65,9 @@ namespace ImperitWASM.Shared.Data
 		public bool Dry => Region.Dry;
 		public bool Port => Region.Port;
 
-		public Color Fill => Player.ColorOf(Player).Over(Region.Fill);
+		public Color Fill => Player.ColorOf(Player).Over(Region.Color);
 		public Color Stroke => Region.Stroke;
-		public float StrokeWidth => Region.StrokeWidth;
+		public double StrokeWidth => Region.StrokeWidth;
 
 		public bool Equals(Province? other) => other is not null && other.RegionId == RegionId;
 		public override int GetHashCode() => Region.GetHashCode();

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace ImperitWASM.Shared
@@ -31,6 +32,15 @@ namespace ImperitWASM.Shared
 			var selected = e.OfType<TC>().Where(cond);
 			var remaining = e.Where(x => x is not TC y || !cond(y));
 			return remaining.Append(selected.Aggregate(init, interact));
+		}
+		public static ImmutableArray<T> Alter<T>(this ImmutableArray<T> arr, IEnumerable<(int, T)> changes)
+		{
+			var result = arr.ToBuilder();
+			foreach (var (i, modified) in changes)
+			{
+				result[i] = modified;
+			}
+			return result.MoveToImmutable();
 		}
 		public static void Each<T>(this IEnumerable<T> e, Action<T> action)
 		{

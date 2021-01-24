@@ -17,10 +17,12 @@ namespace ImperitWASM.Server.Services
 	{
 		readonly ImperitContext ctx;
 		readonly IPlayers players;
-		public PowerLoader(ImperitContext ctx, IPlayers players)
+		readonly IChangeSaver changes;
+		public PowerLoader(ImperitContext ctx, IPlayers players, IChangeSaver changes)
 		{
 			this.ctx = ctx;
 			this.players = players;
+			this.changes = changes;
 		}
 
 		public IEnumerable<IEnumerable<Power>> Get(int gameId)
@@ -31,7 +33,7 @@ namespace ImperitWASM.Server.Services
 		public Task AddAsync(IEnumerable<Power> powers)
 		{
 			ctx.Powers!.AddRange(powers);
-			return ctx.SaveChangesAsync();
+			return changes.SaveAsync();
 		}
 		public int Count(int gameId) => ctx.Powers!.Count(power => power.GameId == gameId);
 	}

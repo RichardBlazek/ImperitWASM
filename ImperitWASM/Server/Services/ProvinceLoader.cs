@@ -11,10 +11,8 @@ namespace ImperitWASM.Server.Services
 	public interface IProvinces
 	{
 		Provinces this[int gameId] { get; }
+		void Set(int gameId, IEnumerable<Province> provinces);
 		Province this[int gameId, int regionId] { get; }
-		void Add(IEnumerable<Province> provinces);
-		void Update(Province province);
-		void Update(IEnumerable<Province> provinces);
 	}
 	public class ProvinceLoader : IProvinces
 	{
@@ -25,13 +23,14 @@ namespace ImperitWASM.Server.Services
 			this.ctx = ctx;
 			this.graph = graph;
 		}
-		IQueryable<Province> Included => ctx.Provinces!.Include(p => p.Player).Include(p => p.Settings).Include(p => p.Soldiers).ThenInclude(s => s.Regiments).ThenInclude(r => r.Type)
-												.Include(p => p.Region).ThenInclude(r => r.Settings).Include(r => r.Region).ThenInclude(r => r.RegionSoldierTypes).ThenInclude(t => t.SoldierType);
+		IQueryable<Province> Included => ctx.Provinces!.Include(r => r.Region).ThenInclude(r => r.RegionSoldierTypes).ThenInclude(t => t.SoldierType)
+			.Include(p => p.Player).Include(p => p.Settings).Include(p => p.Soldiers).ThenInclude(s => s.Regiments).ThenInclude(r => r.Type);
 		public Provinces this[int gameId] => new Provinces(Included.Where(province => province.GameId == gameId).OrderBy(province => province.RegionId).AsEnumerable().ToImmutableArray(), graph);
+		public void Set(int gameId, IEnumerable<Province> provinces)
+		{
+			ctx.Provinces!.RemoveRange(ctx.Provinces!.Where(p => p.GameId == gameId));
+			ctx.Provinces!.AddRange(provinces);
+		}
 		public Province this[int gameId, int regionId] => Included.Single(province => province.GameId == gameId && province.RegionId == regionId);
-
-		public void Add(IEnumerable<Province> provinces) => ctx.Provinces!.AddRange(provinces);
-		public void Update(Province province) => ctx.Provinces!.Replace(province);
-		public void Update(IEnumerable<Province> provinces) => ctx.Provinces!.ReplaceRange(provinces);
 	}
 }

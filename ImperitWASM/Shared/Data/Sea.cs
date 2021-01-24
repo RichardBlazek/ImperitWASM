@@ -5,11 +5,10 @@ namespace ImperitWASM.Shared.Data
 {
 	public record Sea : Region
 	{
-		public Sea(string name, Shape shape, Soldiers soldiers, Settings settings) : base(name, shape, soldiers, settings) { }
+		public Sea(string name, Shape shape, Soldiers soldiers, Color color, double strokeWidth)
+			: base(name, shape, soldiers, color, strokeWidth) { }
 
-		public override Color Fill => Settings.SeaColor;
 		public override ImmutableArray<string> Text(Soldiers present) => ImmutableArray.Create(Name, present.ToString());
-
 		public override bool Sailable => true;
 
 		public virtual bool Equals(Sea? region) => region is not null && Id == region.Id;

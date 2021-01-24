@@ -20,6 +20,7 @@ namespace ImperitWASM.Shared.Value
 
 		public byte Light() => (byte)((R + G + B) / 3);
 		public Color WithAlpha(byte alpha) => this with { A = alpha };
+		public Color Darken(byte light) => new Color(Prod(R, light), Prod(G, light), Prod(B, light), A);
 
 		public static Color HSV(double H, double S, double V)
 		{

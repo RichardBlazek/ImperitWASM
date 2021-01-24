@@ -1,4 +1,6 @@
-﻿namespace ImperitWASM.Shared.Data
+﻿using ImperitWASM.Shared.Value;
+
+namespace ImperitWASM.Shared.Data
 {
 	public abstract record Action
 	{

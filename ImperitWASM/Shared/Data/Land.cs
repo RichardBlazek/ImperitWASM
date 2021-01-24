@@ -9,8 +9,9 @@ namespace ImperitWASM.Shared.Data
 		public bool IsFinal { get; private set; }
 		public bool IsStart { get; private set; }
 		public bool HasPort { get; private set; }
-		public Land(string name, Shape shape, Soldiers soldiers, Settings settings, int earnings, bool isStart, bool isFinal, bool hasPort)
-			: base(name, shape, soldiers, settings) => (Earnings, IsStart, IsFinal, HasPort) = (earnings, isStart, isFinal, hasPort);
+		public int DefaultInstabilityInt { get; private set; }
+		public Land(string name, Shape shape, Soldiers soldiers, Color color, double strokeWidth, int earnings, bool isStart, bool isFinal, bool hasPort, int defaultInstabilityInt)
+			: base(name, shape, soldiers, color, strokeWidth) => (Earnings, IsStart, IsFinal, HasPort, DefaultInstabilityInt) = (earnings, isStart, isFinal, hasPort, defaultInstabilityInt);
 
 		public override bool Inhabitable => IsStart;
 		public override int Score => IsFinal ? 1 : 0;
@@ -21,10 +22,8 @@ namespace ImperitWASM.Shared.Data
 		public override bool Mainland => true;
 		public override bool Dry => true;
 
-		public override int Price => Settings.LandPrice(Soldiers, Earnings);
-		public override Color Fill => Settings.LandColor;
-
-		public override Ratio Instability(Soldiers present) => Settings.Instability(present, Soldiers);
+		public override int Price => Soldiers.Price + Soldiers.DefensePower + Earnings;
+		public override Ratio Instability(Soldiers now) => new Ratio(DefaultInstabilityInt).Adjust(System.Math.Max(DefensePower - now.DefensePower, 0), DefensePower);
 		public override ImmutableArray<string> Text(Soldiers present) => ImmutableArray.Create(Name + (IsFinal ? "\u2605" : "") + (HasPort ? "\u2693" : ""), present.ToString(), Earnings + "\uD83D\uDCB0");
 
 		public virtual bool Equals(Land? region) => region is not null && Id == region.Id;

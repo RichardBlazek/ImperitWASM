@@ -1,3 +1,5 @@
+using ImperitWASM.Shared.Value;
+
 namespace ImperitWASM.Shared.Data
 {
 	public record Loan : Action

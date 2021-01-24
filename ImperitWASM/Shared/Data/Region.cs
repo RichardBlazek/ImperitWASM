@@ -14,13 +14,15 @@ namespace ImperitWASM.Shared.Data
 		public int SoldiersId { get; private set; }
 		public Soldiers Soldiers { get; private set; }
 		public ICollection<RegionSoldierType>? RegionSoldierTypes { get; private set; }
-		public Settings Settings { get; private set; }
-		public Region(string name, Shape shape, Soldiers soldiers, Settings settings)
+		public Color Color { get; private set; }
+		public double StrokeWidth { get; private set; }
+		public Region(string name, Shape shape, Soldiers soldiers, Color color, double strokeWidth)
 		{
 			Name = name;
 			Shape = shape;
 			Soldiers = soldiers;
-			Settings = settings;
+			Color = color;
+			StrokeWidth = strokeWidth;
 		}
 
 		public int AttackPower => Soldiers.AttackPower;
@@ -28,6 +30,8 @@ namespace ImperitWASM.Shared.Data
 		public int Power => Soldiers.Power;
 		public ImmutableArray<Point> Border => Shape.Border;
 		public Point Center => Shape.Center;
+		public Color Stroke => Color.WithAlpha(255).Darken(128);
+
 		public bool IsRecruitable(SoldierType type) => RegionSoldierTypes!.Any(t => t.SoldierType == type);
 		public bool IsShaky(Soldiers present) => Instability(present).RandomBool;
 
@@ -40,10 +44,6 @@ namespace ImperitWASM.Shared.Data
 		public virtual int Price => int.MaxValue;
 		public virtual int Score => 0;
 		public virtual int Income => 0;
-
-		public virtual Color Fill => new Color();
-		public virtual Color Stroke => new Color();
-		public virtual float StrokeWidth => 0.0f;
 
 		public virtual Ratio Instability(Soldiers present) => Ratio.Zero;
 		public virtual ImmutableArray<string> Text(Soldiers present) => ImmutableArray<string>.Empty;

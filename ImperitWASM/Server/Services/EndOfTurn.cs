@@ -26,7 +26,7 @@ namespace ImperitWASM.Server.Services
 		{
 			if (await commands.PerformAsync(actorName, new NextTurn()) is (true, var players, var provinces))
 			{
-				bool finish = !players.Any(player => player is Human { Alive: true }) || (provinces.Winner is (Human, int finals) && finals >= sl.Settings.FinalLandsCount);
+				bool finish = !players.Any(player => player is { IsHuman: true, Alive: true }) || (provinces.Winner is ({ IsHuman: true }, int finals) && finals >= sl.Settings.FinalLandsCount);
 				int turn = powers.Count(gameId);
 				if (finish)
 				{

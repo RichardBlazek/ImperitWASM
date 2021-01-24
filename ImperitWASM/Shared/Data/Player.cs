@@ -5,22 +5,29 @@ using ImperitWASM.Shared.Value;
 
 namespace ImperitWASM.Shared.Data
 {
-	public abstract record Player
+	public sealed record Player
 	{
 		public string Name { get; private set; }
 		public int GameId { get; private set; }
 		public int Order { get; private set; }
-		public Color Color { get; private set; }
 		public int Money { get; private set; }
 		public bool Alive { get; private set; }
 		public ICollection<Action>? ActionList { get; private set; }
 		public ImmutableArray<Action> Actions => ActionList!.ToImmutableArray();
-		public Settings Settings { get; private set; }
 		public bool IsActive { get; private set; }
-		public Player(string name, int gameId, int order, Color color, int money, bool alive, Settings settings, bool isActive) => (Name, GameId, Order, Color, Money, Alive, Settings, IsActive) = (name, gameId, order, color, money, alive, settings, isActive);
+		public bool IsHuman { get; private set; }
+		public string StringPassword { get; private set; }
+		public Password Password => new Password(StringPassword);
+		public Player(string name, int gameId, int order, int money, bool alive, bool isActive, bool isHuman, Password password)
+		{
+			(Name, GameId, Order, Money, Alive, IsActive, IsHuman) = (name, gameId, order, money, alive, isActive, isHuman);
+			StringPassword = password.ToString();
+		}
 
-		public int MaxBorrowable => Settings.Discount(Settings.DebtLimit - Debt);
-		public int MaxUsableMoney => Money + MaxBorrowable;
+		public static Color ColorOf(int i) => Color.Generate(i, 120.0, 1.0, 1.0);
+		public Color Color => ColorOf(Order);
+		public int MaxBorrowable(Settings s) => s.Discount(s.DebtLimit - Debt);
+		public int MaxUsableMoney(Settings s) => Money + MaxBorrowable(s);
 		public Player ChangeMoney(int amount) => this with { Money = amount + Money };
 		public Player Earn(Provinces provinces) => ChangeMoney(provinces.IncomeOf(this));
 		public Player InvertActive() => this with { IsActive = !IsActive };
@@ -46,13 +53,13 @@ namespace ImperitWASM.Shared.Data
 
 		public int Debt => Actions.OfType<Loan>().Sum(a => a.Debt);
 		public Power Power(int turn, IEnumerable<Province> provinces) => new Power(GameId, turn, Alive, provinces.Sum(p => p.Score), provinces.Sum(p => p.Income), Money - Debt, provinces.Sum(p => p.Power));
-		public virtual bool Equals(Player? obj) => obj is not null && Name == obj.Name;
+		public bool Equals(Player? obj) => obj is not null && Name == obj.Name;
 		public override int GetHashCode() => Name.GetHashCode();
 
 		public static Color ColorOf(Player? player) => player?.Color ?? new Color();
 
 #pragma warning disable CS8618
-		protected Player() { }
+		private Player() { }
 #pragma warning restore CS8618
 	}
 }

@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using ImperitWASM.Shared.Data;
+using ImperitWASM.Shared.Value;
 
 namespace ImperitWASM.Shared.Commands
 {
 	public record NextTurn : ICommand
 	{
-		public virtual bool Allowed(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings)
+		public virtual bool Allowed(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings, IEnumerable<SoldierType> soldierTypes, IReadOnlyList<Region> regions)
 		{
 			return actor.IsActive;
 		}
@@ -33,12 +34,12 @@ namespace ImperitWASM.Shared.Commands
 			(new_players, new_provinces) = Clear(actor, new_players, new_provinces.ToArray());
 			return (NextActive(active, new_players.ToArray()), provinces.With(new_provinces));
 		}
-		public virtual (IEnumerable<Player>, IEnumerable<Province>) Perform(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings)
+		public virtual (IEnumerable<Player>, IEnumerable<Province>) Perform(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings, IEnumerable<SoldierType> soldierTypes, IReadOnlyList<Region> regions)
 		{
 			var (new_players, new_provinces) = EndOfTurn(actor, players, provinces, settings);
-			while (new_players.First(p => p.IsActive) is Robot robot && new_players.Count(p => p is Human { Alive: true }) > 1)
+			while (new_players.First(p => p.IsActive) is { IsHuman: false } robot && new_players.Count(p => p is { IsHuman: true, Alive: true }) > 1)
 			{
-				(robot, new_provinces) = robot.Think(new_players, new_provinces, settings);
+				(robot, new_provinces) = new Brain(robot, soldierTypes, regions).Think(new_players, new_provinces, settings);
 				(new_players, new_provinces) = EndOfTurn(robot, new_players.Select(player => player == robot ? robot : player).ToArray(), new_provinces, settings);
 			}
 			return (new_players, new_provinces);

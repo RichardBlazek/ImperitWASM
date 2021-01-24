@@ -25,11 +25,6 @@ namespace ImperitWASM.Server
 			_ = builder.HasKey(property);
 			return builder.Property(property).ValueGeneratedNever();
 		}
-		public static void Replace<T>(this DbSet<T> set, T entity) where T : class
-		{
-			_ = set.Remove(entity);
-			_ = set.Add(entity);
-		}
 		public static void ReplaceRange<T>(this DbSet<T> set, IEnumerable<T> entities) where T : class
 		{
 			set.RemoveRange(entities);

@@ -32,7 +32,7 @@ namespace ImperitWASM.Server.Controllers
 			this.powers = powers;
 		}
 		[HttpPost("Info")]
-		public GameInfo Info([FromBody] string player) => players[player] is Human H ? new(gs.Find(H.GameId)?.Current, H.IsActive) : new(null, false);
+		public GameInfo Info([FromBody] string player) => players[player] is { IsHuman: true } H ? new(gs.Find(H.GameId)?.Current, H.IsActive) : new(null, false);
 		[HttpPost("StartInfo")]
 		public async Task<StartInfo> StartInfo([FromBody] int gameId)
 		{
@@ -40,7 +40,7 @@ namespace ImperitWASM.Server.Controllers
 			return gs.Find(gameId) is Game g ? new(g.Current, g.StartTime) : new(null, DateTime.MinValue);
 		}
 		[HttpPost("Winner")]
-		public Winner? Winner([FromBody] int gameId) => provinces[gameId].Winner is (Human H, _) ? new Winner(H.Name, H.Color) : null;
+		public Winner? Winner([FromBody] int gameId) => provinces[gameId].Winner is ({ IsHuman: true } H, _) ? new Winner(H.Name, H.Color) : null;
 		async Task<RegistrationErrors> DoRegistrationAsync(RegisteredPlayer player, Game game)
 		{
 			await gameCreator.RegisterAsync(game, player.N.Trim(), Password.FromPassword(player.P.Trim()), player.S);

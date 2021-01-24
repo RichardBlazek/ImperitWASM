@@ -28,14 +28,13 @@ namespace ImperitWASM.Server.Services
 			var loaded_players = players[actor.GameId];
 			var loaded_provinces = provinces[actor.GameId];
 
-			if (command.Allowed(actor, loaded_players, loaded_provinces, sl.Settings))
+			if (command.Allowed(actor, loaded_players, loaded_provinces, sl.Settings, sl.SoldierTypes, sl.Regions))
 			{
-				var (new_players, new_provinces) = command.Perform(actor, loaded_players, loaded_provinces, sl.Settings);
+				var (new_players, new_provinces) = command.Perform(actor, loaded_players, loaded_provinces, sl.Settings, sl.SoldierTypes, sl.Regions);
 				var player_array = new_players.ToImmutableArray();
 				var province_array = new_provinces.ToImmutableArray();
 
-				players.Update(new_players);
-				provinces.Update(new_provinces);
+				changes.Change(actor.GameId, new_players, new_provinces);
 				await changes.SaveAsync();
 				return (true, player_array, loaded_provinces.With(province_array));
 			}

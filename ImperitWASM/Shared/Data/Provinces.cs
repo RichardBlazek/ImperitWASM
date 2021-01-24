@@ -30,6 +30,6 @@ namespace ImperitWASM.Shared.Data
 		public int IncomeOf(Player player) => Split(p => p.IsAllyOf(player), (from, to) => to.IsAllyOf(player)).DefaultIfEmpty().Max(prov => prov?.OfType<Land>()?.Sum(p => p.Earnings) ?? 0);
 
 		public IEnumerable<int> Inhabitable => Items.Indices(province => province.Inhabitable);
-		public (Human?, int) Winner => Items.GroupBy(province => province.Player).Where(g => g.Key is Human).Select(g => (g.Key, g.Sum(province => province.Score))).OrderBy(p => p.Item2).FirstOrDefault() is (Human human, int finals) ? (human, finals) : (null, 0);
+		public (Player?, int) Winner => Items.GroupBy(province => province.Player).Where(g => g.Key.IsHuman).Select(g => (g.Key, g.Sum(province => province.Score))).OrderBy(p => p.Item2).FirstOrDefault() is ({ IsHuman: true } human, int finals) ? (human, finals) : (null, 0);
 	}
 }

@@ -3,6 +3,7 @@ using ImperitWASM.Client.Data;
 using ImperitWASM.Server.Services;
 using ImperitWASM.Shared.Commands;
 using ImperitWASM.Shared.Data;
+using ImperitWASM.Shared.Value;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ImperitWASM.Server.Controllers
@@ -13,19 +14,19 @@ namespace ImperitWASM.Server.Controllers
 	{
 		readonly IProvinces provinces;
 		readonly IPlayers players;
-		readonly Settings settings;
-		public SwitchController(IProvinces provinces, Settings settings, IPlayers players)
+		readonly ISettings sl;
+		public SwitchController(IProvinces provinces, ISettings sl, IPlayers players)
 		{
 			this.provinces = provinces;
-			this.settings = settings;
+			this.sl = sl;
 			this.players = players;
 		}
 
 		bool IsPossible(Provinces provinces, Player player, Switch s) => s.From is int from && s.To is int to && s.View switch
 		{
-			View.Recruit => settings.RecruitableIn(to).Any(),
+			View.Recruit => sl.RecruitableIn(to).Any(),
 			View.Move => provinces[from].CanAnyMove(provinces, provinces[to]),
-			View.Purchase => provinces[to].Mainland && new Buy(provinces[to]).Allowed(player, provinces),
+			View.Purchase => provinces[to].Mainland && new Buy(provinces[to]).Allowed(player, provinces, sl.Settings),
 			_ => false
 		};
 		Switch IfPossible(Provinces provinces, Player player, Switch s) => IsPossible(provinces, player, s) ? s : new Switch(s.Select, View.Map, null, null);

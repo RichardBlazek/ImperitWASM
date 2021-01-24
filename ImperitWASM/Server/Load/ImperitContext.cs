@@ -1,6 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using ImperitWASM.Client.Data;
 using ImperitWASM.Shared.Data;
+using ImperitWASM.Shared.Value;
 using Microsoft.EntityFrameworkCore;
 
 namespace ImperitWASM.Server.Load
@@ -12,24 +14,18 @@ namespace ImperitWASM.Server.Load
 		public DbSet<Player>? Players { get; set; }
 		public DbSet<Province>? Provinces { get; set; }
 		public DbSet<Power>? Powers { get; set; }
-		public DbSet<Settings>? Settings { get; set; }
+		public DbSet<Region>? Region { get; set; }
+		public DbSet<SoldierType>? SoldierType { get; set; }
 		public ImperitContext() => ChangeTracker.LazyLoadingEnabled = false;
 		public Task<int> RunSqlAsync(string cmd) => Database.ExecuteSqlRawAsync(cmd);
 		protected override void OnConfiguring(DbContextOptionsBuilder opt)
 		{
 			_ = opt.UseSqlite("Data Source=" + System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory ?? ".", "Files/imperit.db"));
-			_ = opt.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+			_ = opt.UseQueryTrackingBehavior(QueryTrackingBehavior.TrackAll);
 		}
 		protected override void OnModelCreating(ModelBuilder mod)
 		{
-			_ = mod.Entity<Settings>(settings =>
-			{
-				_ = settings.OwnsOne(s => s.LandColor);
-				_ = settings.OwnsOne(s => s.MountainsColor);
-				_ = settings.OwnsOne(s => s.SeaColor);
-				_ = settings.Ignore(s => s.Regions).HasMany(s => s.RegionCollection).WithOne(r => r.Settings).Required();
-				_ = settings.Ignore(s => s.SoldierTypes).HasMany(s => s.SoldierTypeCollection).WithOne().Required();
-			}).Entity<Province>(province =>
+			_ = mod.Entity<Province>(province =>
 			{
 				_ = province.HasKey(p => new { p.GameId, p.RegionId });
 				_ = province.HasOne(p => p.Player).WithMany().Cascade();
@@ -40,15 +36,16 @@ namespace ImperitWASM.Server.Load
 				_ = province.Ignore(p => p.Center).Ignore(p => p.Border);
 			}).Entity<Region>(region =>
 			{
+				_ = region.HasCustomKey(r => r.Id);
+				_ = region.OwnsOne(r => r.Color);
 				_ = region.HasOne(r => r.Soldiers).WithOne().HasForeignKey<Region>(r => r.SoldiersId).Required();
 				_ = region.HasMany(r => r.RegionSoldierTypes).WithOne().Required();
 				_ = region.HasOne(r => r.Shape).WithOne().HasForeignKey<Region>(r => r.ShapeId).Required();
-				_ = region.Ignore(r => r.Center).Ignore(r => r.Border);
+				_ = region.Ignore(r => r.Center).Ignore(r => r.Border).Ignore(r => r.Stroke);
 			}).Entity<Player>(player =>
 			{
-				_ = player.OwnsOne(p => p.Color);
-				_ = player.HasOne(p => p.Settings).WithMany().Required();
-				_ = player.Ignore(p => p.Actions).HasMany(p => p.ActionList).WithOne().Required();
+				_ = player.Ignore(p => p.Actions).Ignore(p => p.Color);
+				_ = player.HasMany(p => p.ActionList).WithOne().Required();
 				_ = player.HasOne<Game>().WithMany().Required().HasForeignKey(p => p.GameId);
 				_ = player.HasCustomKey(p => p.Name);
 			}).Entity<Session>(session =>
@@ -66,12 +63,19 @@ namespace ImperitWASM.Server.Load
 				.Entity<Soldiers>(soldiers => soldiers.Ignore(s => s.Types).HasMany(s => s.Regiments).WithOne().Required())
 				.Entity<Regiment>(regiment => regiment.HasOne(r => r.Type).WithMany().Required())
 				.Entity<Game>(game => { }).Entity<Action>(action => { }).Entity<Loan>(loan => { })
-				.Entity<Human>(human => { }).Entity<Robot>(robot => { }).Entity<Land>(land => { })
-				.Entity<Sea>(sea => { }).Entity<Mountains>(mountains => { }).Entity<Pedestrian>(_ => { })
-				.Entity<Ship>(ship => ship.Property(s => s.Capacity).HasColumnName("Capacity"))
+				.Entity<Land>(land => { }).Entity<Sea>(sea => { }).Entity<Mountains>(mountains => { })
+				.Entity<Pedestrian>(_ => { }).Entity<Ship>(ship => ship.Property(s => s.Capacity).HasColumnName("Capacity"))
 				.Entity<OutlandishShip>(ship => ship.Property(os => os.Speed).HasColumnName("Speed"));
 
 			base.OnModelCreating(mod);
+		}
+		public void Detach(System.Func<object, bool> cond)
+		{
+			var entries = ChangeTracker.Entries().Where(x => x.State != EntityState.Detached && cond(x.Entity)).ToList();
+			for (int i = 0; i < entries.Count; ++i)
+			{
+				entries[i].State = EntityState.Detached;
+			}
 		}
 	}
 }

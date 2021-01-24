@@ -39,12 +39,12 @@ namespace ImperitWASM.Server.Controllers
 		public MoveInfo MoveInfo([FromBody] MoveData move)
 		{
 			var prov = provinces[move.G];
-			return new MoveInfo(prov[move.F].CanAnyMove(prov, prov[move.T]), prov[move.F].Name, prov[move.T].Name, prov[move.F].Soldiers.ToString(), prov[move.T].Soldiers.ToString(), sl.Settings.SoldierTypes.Select(type => prov[move.F].Soldiers.CountOf(type)).ToImmutableArray());
+			return new MoveInfo(prov[move.F].CanAnyMove(prov, prov[move.T]), prov[move.F].Name, prov[move.T].Name, prov[move.F].Soldiers.ToString(), prov[move.T].Soldiers.ToString(), sl.SoldierTypes.Select(type => prov[move.F].Soldiers.CountOf(type)).ToImmutableArray());
 		}
 		[HttpPost("Move")]
 		public async Task<MoveErrors> Move([FromBody] MoveCmd m)
 		{
-			var move = new Move(provinces[m.G, m.From], provinces[m.G, m.To], new Soldiers(m.Counts.Select((count, i) => new Regiment(sl.Settings.SoldierTypes[i], count))));
+			var move = new Move(provinces[m.G, m.From], provinces[m.G, m.To], new Soldiers(m.Counts.Select((count, i) => new Regiment(sl.SoldierTypes[i], count))));
 			return (await cmd.PerformAsync(m.P, move)) switch
 			{
 				(true, _, _) => MoveErrors.Ok,
@@ -59,7 +59,7 @@ namespace ImperitWASM.Server.Controllers
 		{
 			var player = players[purchase.P]!;
 			var prov = provinces[player.GameId];
-			return prov[purchase.L].Mainland ? new PurchaseInfo(new Buy(prov[purchase.L]).Allowed(player, prov), prov[purchase.L].Name, prov[purchase.L].Price, player.Money) : new PurchaseInfo(false, "", 0, 0);
+			return prov[purchase.L].Mainland ? new PurchaseInfo(new Buy(prov[purchase.L]).Allowed(player, prov, sl.Settings), prov[purchase.L].Name, prov[purchase.L].Price, player.Money) : new PurchaseInfo(false, "", 0, 0);
 		}
 		[HttpPost("Purchase")]
 		public async Task Purchase([FromBody] PurchaseCmd purchase)
@@ -74,14 +74,14 @@ namespace ImperitWASM.Server.Controllers
 		{
 			var player = players[p.P]!;
 			var province = provinces[player.GameId, p.W];
-			return new RecruitInfo(province.Name, province.Soldiers.ToString(), sl.Settings.SoldierTypes.Select(type => type.IsRecruitable(province.Region)).ToImmutableArray(), player.Money, province.Instability);
+			return new RecruitInfo(province.Name, province.Soldiers.ToString(), sl.SoldierTypes.Select(type => type.IsRecruitable(province.Region)).ToImmutableArray(), player.Money, province.Instability);
 		}
 		[HttpPost("Recruit")]
 		public async Task Recruit([FromBody] RecruitCmd r)
 		{
 			if (session.IsValid(new Session(r.P, r.Key)))
 			{
-				var soldiers = new Soldiers(r.Counts.Zip(sl.Settings.SoldierTypes, (count, type) => new Regiment(type, count)));
+				var soldiers = new Soldiers(r.Counts.Zip(sl.SoldierTypes, (count, type) => new Regiment(type, count)));
 				var result = await cmd.PerformAsync(r.P, new Recruit(provinces[r.G, r.Province], soldiers));
 			}
 		}
