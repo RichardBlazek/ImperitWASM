@@ -18,13 +18,13 @@ namespace ImperitWASM.Server.Services
 	{
 		readonly ImperitContext ctx;
 		readonly Graph graph;
-		public ProvinceLoader(ImperitContext ctx, Graph graph)
+		public ProvinceLoader(ImperitContext ctx, ISettings sl)
 		{
 			this.ctx = ctx;
-			this.graph = graph;
+			graph = sl.Graph;
 		}
 		IQueryable<Province> Included => ctx.Provinces!.Include(r => r.Region).ThenInclude(r => r.RegionSoldierTypes).ThenInclude(t => t.SoldierType)
-			.Include(p => p.Player).Include(p => p.Settings).Include(p => p.Soldiers).ThenInclude(s => s.Regiments).ThenInclude(r => r.Type);
+			.Include(p => p.Player).Include(p => p.Soldiers).ThenInclude(s => s.Regiments).ThenInclude(r => r.Type);
 		public Provinces this[int gameId] => new Provinces(Included.Where(province => province.GameId == gameId).OrderBy(province => province.RegionId).AsEnumerable().ToImmutableArray(), graph);
 		public void Set(int gameId, IEnumerable<Province> provinces)
 		{

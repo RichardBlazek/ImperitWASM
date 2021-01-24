@@ -41,7 +41,7 @@ namespace ImperitWASM.Server.Services
 				.Include(region => region.Soldiers).ThenInclude(soldiers => soldiers.Regiments).ThenInclude(regiment => regiment.Type).ToImmutableArray();
 		}
 		public IEnumerable<SoldierType> RecruitableIn(int i) => SoldierTypes!.Where(t => t.IsRecruitable(Regions[i]));
-		public List<Province> Provinces(int gameId) => Regions!.Select(reg => new Province(gameId, reg, reg.Soldiers, Settings)).ToList();
+		public List<Province> Provinces(int gameId) => Regions!.Select(region => new Province(gameId, region, region.Soldiers)).ToList();
 		int StartMoney(int province) => Settings.DefaultMoney - (Regions[province].Income * 4);
 		
 		static readonly string Vowels = "aeiouy", Consonant = "bcdfghjklmnprstvz";

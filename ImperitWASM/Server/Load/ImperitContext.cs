@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using ImperitWASM.Client.Data;
 using ImperitWASM.Shared.Data;
-using ImperitWASM.Shared.Value;
 using Microsoft.EntityFrameworkCore;
 
 namespace ImperitWASM.Server.Load
@@ -29,7 +28,6 @@ namespace ImperitWASM.Server.Load
 			{
 				_ = province.HasKey(p => new { p.GameId, p.RegionId });
 				_ = province.HasOne(p => p.Player).WithMany().Cascade();
-				_ = province.HasOne(p => p.Settings).WithMany().Required();
 				_ = province.HasOne(p => p.Soldiers).WithOne().HasPrincipalKey<Soldiers>(s => s.Id).Required();
 				_ = province.HasOne(p => p.Region).WithMany().HasForeignKey(p => p.RegionId).Required();
 				_ = province.HasOne<Game>().WithMany().HasForeignKey(p => p.GameId).Required();
