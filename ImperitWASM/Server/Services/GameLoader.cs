@@ -2,7 +2,7 @@
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
-using ImperitWASM.Server.Load;
+using ImperitWASM.Server.Db;
 using ImperitWASM.Shared.Data;
 
 namespace ImperitWASM.Server.Services
@@ -20,9 +20,9 @@ namespace ImperitWASM.Server.Services
 	}
 	public class GameLoader : IGames
 	{
-		readonly ImperitContext ctx;
+		readonly Context ctx;
 		readonly ISettings sl;
-		public GameLoader(ImperitContext ctx, ISettings sl)
+		public GameLoader(Context ctx, ISettings sl)
 		{
 			this.ctx = ctx;
 			this.sl = sl;

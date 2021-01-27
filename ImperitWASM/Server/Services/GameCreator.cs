@@ -21,20 +21,19 @@ namespace ImperitWASM.Server.Services
 		readonly IGames gs;
 		readonly ISettings sl;
 		readonly IChangeSaver changes;
-		public GameCreator(IProvinces provinces, IGames gs, ISettings sl, IChangeSaver changes, IPlayers players)
+		public GameCreator(IProvinces provinces_loader, IGames gs, ISettings sl, IChangeSaver changes, IPlayers players_loader)
 		{
-			this.provinces_loader = provinces;
+			this.provinces_loader = provinces_loader;
 			this.gs = gs;
 			this.sl = sl;
 			this.changes = changes;
-			this.players_loader = players;
+			this.players_loader = players_loader;
 		}
 		public async Task<int> CreateAsync()
 		{
-			var game = await gs.AddAsync();
-			changes.Attach(sl.Settings);
 			gs.RemoveOld(DateTime.UtcNow.AddDays(-1.0));
-			provinces_loader.Set(game.Id, sl.Provinces(game.Id));
+			var game = await gs.AddAsync();
+			changes.Change(game.Id, Array.Empty<Player>(), sl.Provinces(game.Id));
 			await changes.SaveAsync();
 			return game.Id;
 		}

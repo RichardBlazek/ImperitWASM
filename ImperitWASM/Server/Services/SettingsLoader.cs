@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
-using ImperitWASM.Server.Load;
+using ImperitWASM.Server.Db;
 using ImperitWASM.Shared;
 using ImperitWASM.Shared.Data;
 using ImperitWASM.Shared.Value;
@@ -34,14 +34,14 @@ namespace ImperitWASM.Server.Services
 		{
 			Settings = Load<Settings>(parent, settings);
 			Graph = new Graph(Load<ImmutableArray<ImmutableArray<int>>>(parent, graph));
-			using var ctx = new ImperitContext();
+			using var ctx = new Context();
 			SoldierTypes = ctx.SoldierType!.AsTracking().OrderBy(t => t.Symbol).ToImmutableArray();
 			Regions = ctx.Region!.AsTracking().Include(region => region.Shape).ThenInclude(shape => shape.Center)
 				.Include(region => region.Shape).ThenInclude(shape => shape.Points).Include(region => region.RegionSoldierTypes).ThenInclude(pst => pst.SoldierType)
 				.Include(region => region.Soldiers).ThenInclude(soldiers => soldiers.Regiments).ThenInclude(regiment => regiment.Type).ToImmutableArray();
 		}
-		public IEnumerable<SoldierType> RecruitableIn(int i) => SoldierTypes!.Where(t => t.IsRecruitable(Regions[i]));
-		public List<Province> Provinces(int gameId) => Regions!.Select(region => new Province(gameId, region, region.Soldiers)).ToList();
+		public IEnumerable<SoldierType> RecruitableIn(int i) => SoldierTypes.Where(t => t.IsRecruitable(Regions[i]));
+		public List<Province> Provinces(int gameId) => Regions.Select(region => new Province(gameId, region.Id, region.Soldiers)).ToList();
 		int StartMoney(int province) => Settings.DefaultMoney - (Regions[province].Income * 4);
 		
 		static readonly string Vowels = "aeiouy", Consonant = "bcdfghjklmnprstvz";

@@ -10,8 +10,6 @@ namespace ImperitWASM.Shared.Data
 		public bool IsStart { get; private set; }
 		public bool HasPort { get; private set; }
 		public int DefaultInstabilityInt { get; private set; }
-		public Land(string name, Shape shape, Soldiers soldiers, Color color, double strokeWidth, int earnings, bool isStart, bool isFinal, bool hasPort, int defaultInstabilityInt)
-			: base(name, shape, soldiers, color, strokeWidth) => (Earnings, IsStart, IsFinal, HasPort, DefaultInstabilityInt) = (earnings, isStart, isFinal, hasPort, defaultInstabilityInt);
 
 		public override bool Inhabitable => IsStart;
 		public override int Score => IsFinal ? 1 : 0;

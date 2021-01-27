@@ -3,9 +3,14 @@ using System.Globalization;
 
 namespace ImperitWASM.Shared.Value
 {
-	public sealed record Color(byte R, byte G, byte B, byte A = 255)
+	public struct Color
 	{
-		public Color() : this(0, 0, 0, 0) { }
+		public byte R { get; init; }
+		public byte G { get; init; }
+		public byte B { get; init; }
+		public byte A { get; init; }
+		public Color(byte r, byte g, byte b, byte a = 255) => (R, G, B, A) = (r, g, b, a);
+
 		static string ToHex(byte num) => num.ToString("x2", CultureInfo.InvariantCulture);
 		static byte FromHex(string s) => byte.Parse(s, NumberStyles.HexNumber, CultureInfo.InvariantCulture);
 		public static Color Parse(string str) => new Color(FromHex(str[1..3]), FromHex(str[3..5]), FromHex(str[5..7]), str.Length < 9 ? (byte)255 : FromHex(str[7..9]));
@@ -19,7 +24,7 @@ namespace ImperitWASM.Shared.Value
 		public Color Over(Color color) => new Color(Mix(R, color.R, A, Neg(A)), Mix(G, color.G, A, Neg(A)), Mix(B, color.B, A, Neg(A)), Supl(A, color.A));
 
 		public byte Light() => (byte)((R + G + B) / 3);
-		public Color WithAlpha(byte alpha) => this with { A = alpha };
+		public Color WithAlpha(byte alpha) => new Color(R, G, B, alpha);
 		public Color Darken(byte light) => new Color(Prod(R, light), Prod(G, light), Prod(B, light), A);
 
 		public static Color HSV(double H, double S, double V)

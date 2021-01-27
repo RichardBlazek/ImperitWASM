@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using ImperitWASM.Client.Data;
-using ImperitWASM.Server.Load;
+using ImperitWASM.Server.Db;
 
 namespace ImperitWASM.Server.Services
 {
@@ -17,8 +17,8 @@ namespace ImperitWASM.Server.Services
 	public class SessionLoader : ISessions
 	{
 		readonly RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
-		readonly ImperitContext ctx;
-		public SessionLoader(ImperitContext ctx) => this.ctx = ctx;
+		readonly Context ctx;
+		public SessionLoader(Context ctx) => this.ctx = ctx;
 		string GenerateToken(int len)
 		{
 			byte[] buf = new byte[len];

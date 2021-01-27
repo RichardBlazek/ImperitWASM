@@ -4,9 +4,9 @@ using ImperitWASM.Client.Data;
 using ImperitWASM.Shared.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace ImperitWASM.Server.Load
+namespace ImperitWASM.Server.Db
 {
-	public class ImperitContext : DbContext
+	public class Context : DbContext
 	{
 		public DbSet<Session>? Sessions { get; set; }
 		public DbSet<Game>? Games { get; set; }
@@ -15,12 +15,12 @@ namespace ImperitWASM.Server.Load
 		public DbSet<Power>? Powers { get; set; }
 		public DbSet<Region>? Region { get; set; }
 		public DbSet<SoldierType>? SoldierType { get; set; }
-		public ImperitContext() => ChangeTracker.LazyLoadingEnabled = false;
+		public Context() => ChangeTracker.LazyLoadingEnabled = false;
 		public Task<int> RunSqlAsync(string cmd) => Database.ExecuteSqlRawAsync(cmd);
 		protected override void OnConfiguring(DbContextOptionsBuilder opt)
 		{
 			_ = opt.UseSqlite("Data Source=" + System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory ?? ".", "Files/imperit.db"));
-			_ = opt.UseQueryTrackingBehavior(QueryTrackingBehavior.TrackAll);
+			_ = opt.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 		}
 		protected override void OnModelCreating(ModelBuilder mod)
 		{
@@ -31,11 +31,10 @@ namespace ImperitWASM.Server.Load
 				_ = province.HasOne(p => p.Soldiers).WithOne().HasPrincipalKey<Soldiers>(s => s.Id).Required();
 				_ = province.HasOne(p => p.Region).WithMany().HasForeignKey(p => p.RegionId).Required();
 				_ = province.HasOne<Game>().WithMany().HasForeignKey(p => p.GameId).Required();
-				_ = province.Ignore(p => p.Center).Ignore(p => p.Border);
+				_ = province.Ignore(p => p.Center).Ignore(p => p.Border).Ignore(p => p.Fill).Ignore(p => p.Stroke);
 			}).Entity<Region>(region =>
 			{
 				_ = region.HasCustomKey(r => r.Id);
-				_ = region.OwnsOne(r => r.Color);
 				_ = region.HasOne(r => r.Soldiers).WithOne().HasForeignKey<Region>(r => r.SoldiersId).Required();
 				_ = region.HasMany(r => r.RegionSoldierTypes).WithOne().Required();
 				_ = region.HasOne(r => r.Shape).WithOne().HasForeignKey<Region>(r => r.ShapeId).Required();

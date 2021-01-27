@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using ImperitWASM.Server.Load;
+using ImperitWASM.Server.Db;
 using ImperitWASM.Shared.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,8 +18,8 @@ namespace ImperitWASM.Server.Services
 	}
 	public class PlayerLoader : IPlayers
 	{
-		readonly ImperitContext ctx;
-		public PlayerLoader(ImperitContext ctx) => this.ctx = ctx;
+		readonly Context ctx;
+		public PlayerLoader(Context ctx) => this.ctx = ctx;
 		IQueryable<Player> Included => ctx.Players!.Include(p => p.ActionList).Include(p => p.ActionList!.Where(a => a as Manoeuvre != null)).ThenInclude<Player, Action, Soldiers>(a => ((Manoeuvre)a)!.Soldiers).ThenInclude(s => s.Regiments).ThenInclude(r => r.Type);
 		public ImmutableArray<Player> this[int gameId] => Included.Where(player => player.GameId == gameId).OrderBy(player => player.Order).AsEnumerable().ToImmutableArray();
 		public void Set(int gameId, IEnumerable<Player> players)
@@ -28,8 +28,6 @@ namespace ImperitWASM.Server.Services
 			ctx.Players!.AddRange(players);
 		}
 		public Player? this[string? name] => Included.SingleOrDefault(player => player.Name == name);
-		public void Add(Player player) => ctx.Players!.Add(player);
-		public void Update(IEnumerable<Player> players) => ctx.Players!.ReplaceRange(players);
 		public bool IsFreeName(string name) => name.Any(char.IsLetter) && !ctx.Players!.Any(p => p.Name == name);
 		public string ObsfuscateName(string original, int repetition) => ctx.Players!.Select(p => p.Name).Where(name => name.StartsWith(original)).ToList().Select(name => name[original.Length..]).Where(suf => suf.All(c => c is >= '0' and <= '9')).DefaultIfEmpty("").Max(n => n ?? "") switch
 		{

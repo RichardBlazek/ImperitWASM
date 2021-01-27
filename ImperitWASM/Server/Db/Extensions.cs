@@ -4,9 +4,9 @@ using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace ImperitWASM.Server
+namespace ImperitWASM.Server.Db
 {
-	public static class DbExtensions
+	public static class Extensions
 	{
 		public static ReferenceReferenceBuilder<TP, TD> Required<TP, TD>(this ReferenceReferenceBuilder<TP, TD> builder) where TP : class where TD : class
 		{
@@ -24,11 +24,6 @@ namespace ImperitWASM.Server
 		{
 			_ = builder.HasKey(property);
 			return builder.Property(property).ValueGeneratedNever();
-		}
-		public static void ReplaceRange<T>(this DbSet<T> set, IEnumerable<T> entities) where T : class
-		{
-			set.RemoveRange(entities);
-			set.AddRange(entities);
 		}
 	}
 }

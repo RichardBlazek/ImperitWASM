@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ImperitWASM.Server.Load;
+using ImperitWASM.Server.Db;
 using ImperitWASM.Shared.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,10 +15,10 @@ namespace ImperitWASM.Server.Services
 	}
 	public class PowerLoader : IPowers
 	{
-		readonly ImperitContext ctx;
+		readonly Context ctx;
 		readonly IPlayers players;
 		readonly IChangeSaver changes;
-		public PowerLoader(ImperitContext ctx, IPlayers players, IChangeSaver changes)
+		public PowerLoader(Context ctx, IPlayers players, IChangeSaver changes)
 		{
 			this.ctx = ctx;
 			this.players = players;

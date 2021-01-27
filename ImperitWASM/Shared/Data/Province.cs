@@ -10,10 +10,10 @@ namespace ImperitWASM.Shared.Data
 		public Region Region { get; private set; }
 		public Player? Player { get; private set; }
 		public Soldiers Soldiers { get; private set; }
-		public Province(int gameId, Region region, Soldiers soldiers)
+		public Province(int gameId, int regionId, Soldiers soldiers)
 		{
 			GameId = gameId;
-			(Region, RegionId) = (region, region.Id);
+			RegionId = regionId;
 			Soldiers = soldiers;
 		}
 

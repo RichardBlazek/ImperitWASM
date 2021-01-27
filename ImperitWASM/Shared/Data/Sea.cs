@@ -1,13 +1,9 @@
 using System.Collections.Immutable;
-using ImperitWASM.Shared.Value;
 
 namespace ImperitWASM.Shared.Data
 {
 	public record Sea : Region
 	{
-		public Sea(string name, Shape shape, Soldiers soldiers, Color color, double strokeWidth)
-			: base(name, shape, soldiers, color, strokeWidth) { }
-
 		public override ImmutableArray<string> Text(Soldiers present) => ImmutableArray.Create(Name, present.ToString());
 		public override bool Sailable => true;
 

@@ -1,12 +1,7 @@
-using ImperitWASM.Shared.Value;
-
 namespace ImperitWASM.Shared.Data
 {
 	public record Mountains : Region
 	{
-		public Mountains(string name, Shape shape, Soldiers soldiers, Color color, double strokeWidth)
-			: base(name, shape, soldiers, color, strokeWidth) { }
-
 		public override bool Dry => true;
 		public virtual bool Equals(Mountains? region) => region is not null && Id == region.Id;
 		public override int GetHashCode() => Id.GetHashCode();

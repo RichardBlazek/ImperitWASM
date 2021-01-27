@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using ImperitWASM.Server.Load;
+using ImperitWASM.Server.Db;
 using ImperitWASM.Shared.Data;
 using ImperitWASM.Shared.Value;
 using Microsoft.EntityFrameworkCore;
@@ -16,9 +16,9 @@ namespace ImperitWASM.Server.Services
 	}
 	public class ProvinceLoader : IProvinces
 	{
-		readonly ImperitContext ctx;
+		readonly Context ctx;
 		readonly Graph graph;
-		public ProvinceLoader(ImperitContext ctx, ISettings sl)
+		public ProvinceLoader(Context ctx, ISettings sl)
 		{
 			this.ctx = ctx;
 			graph = sl.Graph;

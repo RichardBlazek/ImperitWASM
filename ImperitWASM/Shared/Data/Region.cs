@@ -14,22 +14,18 @@ namespace ImperitWASM.Shared.Data
 		public int SoldiersId { get; private set; }
 		public Soldiers Soldiers { get; private set; }
 		public ICollection<RegionSoldierType>? RegionSoldierTypes { get; private set; }
-		public Color Color { get; private set; }
+		public byte Color_A { get; private set; }
+		public byte Color_B { get; private set; }
+		public byte Color_G { get; private set; }
+		public byte Color_R { get; private set; }
 		public double StrokeWidth { get; private set; }
-		public Region(string name, Shape shape, Soldiers soldiers, Color color, double strokeWidth)
-		{
-			Name = name;
-			Shape = shape;
-			Soldiers = soldiers;
-			Color = color;
-			StrokeWidth = strokeWidth;
-		}
 
 		public int AttackPower => Soldiers.AttackPower;
 		public int DefensePower => Soldiers.DefensePower;
 		public int Power => Soldiers.Power;
 		public ImmutableArray<Point> Border => Shape.Border;
 		public Point Center => Shape.Center;
+		public Color Color => new Color(Color_R, Color_G, Color_B, Color_A);
 		public Color Stroke => Color.WithAlpha(255).Darken(128);
 
 		public bool IsRecruitable(SoldierType type) => RegionSoldierTypes!.Any(t => t.SoldierType == type);
